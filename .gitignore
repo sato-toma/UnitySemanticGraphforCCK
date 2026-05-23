@@ -1,0 +1,45 @@
+# Unity generated folders
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+MemoryCaptures/
+AssetBundles/
+
+# Visual Studio / Rider
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.idea/
+*.vs/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+
+# Unity package cache / build artifacts
+packages/*/Library/
+packages/*/Temp/
+packages/*/obj/
+packages/*/Build/
+packages/*/Builds/
+
+# Keep package source and tests
+!packages/unity-semantic-graph/Editor/Tests/
+!packages/unity-semantic-graph/Editor/Tests/**

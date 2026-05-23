@@ -1,0 +1,8 @@
+{
+    "name": "com.azuki.unity-semantic-graph.test",
+    "version": "1.0.0",
+    "testFramework": "nunit",
+    "testables": [
+        "com.azuki.unity-semantic-graph"
+    ]
+}
