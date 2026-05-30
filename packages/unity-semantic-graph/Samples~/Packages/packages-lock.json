@@ -1,10 +1,11 @@
 {
   "dependencies": {
     "com.azuki.unity-semantic-graph": {
-      "version": "file:E:/_cluster/2026/UnitySemanticGraphforCCK/packages/unity-semantic-graph",
+      "version": "https://github.com/sato-toma/UnitySemanticGraphforCCK.git?path=packages/unity-semantic-graph",
       "depth": 0,
-      "source": "local",
-      "dependencies": {}
+      "source": "git",
+      "dependencies": {},
+      "hash": "ccccd311809ae979a434bf2d8831e3f65b098316"
     },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
