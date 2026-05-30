@@ -4,12 +4,44 @@ using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+
+using PersistentId = System.String;
 
 namespace UnitySemanticGraph.Editor.Exporter
 {
     public static class SelectiveComponentTomlExporter
     {
-        [MenuItem("Tools/UnitySemanticGraph/Export Selected Component Graph to TOML")]
+        [MenuItem("SemanticGraph/Export All Component Graph to TOML")]
+        private static void ExportAllGraph()
+        {
+            var scene = SceneManager.GetActiveScene();
+            var processed = new Dictionary<PersistentId, GameObjectInfo>();
+            foreach (var root in scene.GetRootGameObjects())
+            {
+                AddWithParents(root, processed);
+                AddRelevantDescendants(root, processed);
+            }
+
+            var sorted = processed.Values.OrderBy(g => g.Path).ToList();
+            var defaultPath = Path.Combine(Application.dataPath, "../SceneGraph.toml");
+            var savePath = EditorUtility.SaveFilePanel("Export TOML", Application.dataPath, "SceneGraph.toml", "toml");
+            if (string.IsNullOrEmpty(savePath)) return;
+
+            try
+            {
+                WriteToml(savePath, sorted);
+                AssetDatabase.Refresh();
+                EditorUtility.DisplayDialog("Export Completed", $"TOML ファイルを出力しました:\n{savePath}", "OK");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError(ex);
+                EditorUtility.DisplayDialog("Export Failed", ex.Message, "OK");
+            }
+        }
+
+        [MenuItem("SemanticGraph/Update Selected Component Graph to TOML")]
         private static void ExportSelectedGraph()
         {
             var selectedGameObjects = Selection.gameObjects;
@@ -28,7 +60,28 @@ namespace UnitySemanticGraph.Editor.Exporter
                 return;
             }
 
-            var processed = new Dictionary<string, GameObjectInfo>();
+            var savePath = EditorUtility.SaveFilePanel("Update/Export TOML", Application.dataPath, "SceneGraph.toml", "toml");
+            if (string.IsNullOrEmpty(savePath)) return;
+
+            var processed = new Dictionary<PersistentId, GameObjectInfo>(); // Key: ID
+
+            // 既存のファイルがある場合は読み込んで辞書を初期化する (差分更新のベース)
+            if (File.Exists(savePath))
+            {
+                try
+                {
+                    var existingData = ParseToml(savePath);
+                    foreach (var info in existingData)
+                    {
+                        if (!string.IsNullOrEmpty(info.Id)) processed[info.Id] = info;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogWarning($"既存ファイルの読み込みに失敗しました。新規として書き出します: {ex.Message}");
+                }
+            }
+
             foreach (var gameObject in gameObjects)
             {
                 AddWithParents(gameObject, processed);
@@ -36,13 +89,9 @@ namespace UnitySemanticGraph.Editor.Exporter
             }
 
             var sorted = processed.Values.OrderBy(g => g.Path).ToList();
-            var defaultPath = Path.Combine(Application.dataPath, "../SelectedComponentGraph.toml");
-            var savePath = EditorUtility.SaveFilePanel("Export TOML", Application.dataPath, "SelectedComponentGraph.toml", "toml");
-            if (string.IsNullOrEmpty(savePath)) return;
-
             try
             {
-                File.WriteAllText(savePath, BuildToml(sorted));
+                WriteToml(savePath, sorted);
                 AssetDatabase.Refresh();
                 EditorUtility.DisplayDialog("Export Completed", $"TOML ファイルを出力しました:\n{savePath}", "OK");
             }
@@ -53,20 +102,23 @@ namespace UnitySemanticGraph.Editor.Exporter
             }
         }
 
-        private static void AddWithParents(GameObject gameObject, Dictionary<string, GameObjectInfo> processed)
+        private static void AddWithParents(GameObject gameObject, Dictionary<PersistentId, GameObjectInfo> processed)
         {
             if (gameObject == null) return;
-            var path = GetGameObjectPath(gameObject);
-            if (processed.ContainsKey(path)) return;
+            var id = GetPersistentId(gameObject);
+
+            // ID をキーにして情報を生成/上書きする
+            // これにより、移動（Path変更）したオブジェクトも同一IDとして正しく更新される
 
             var info = new GameObjectInfo
             {
+                Id = id,
                 Name = gameObject.name,
-                Path = path,
+                Path = GetGameObjectPath(gameObject),
                 ParentPath = gameObject.transform.parent != null ? GetGameObjectPath(gameObject.transform.parent.gameObject) : string.Empty,
                 Components = GatherComponents(gameObject)
             };
-            processed[path] = info;
+            processed[id] = info;
 
             if (gameObject.transform.parent != null)
             {
@@ -74,7 +126,7 @@ namespace UnitySemanticGraph.Editor.Exporter
             }
         }
 
-        private static void AddRelevantDescendants(GameObject gameObject, Dictionary<string, GameObjectInfo> processed)
+        private static void AddRelevantDescendants(GameObject gameObject, Dictionary<PersistentId, GameObjectInfo> processed)
         {
             if (gameObject == null) return;
             foreach (Transform child in gameObject.transform)
@@ -118,6 +170,7 @@ namespace UnitySemanticGraph.Editor.Exporter
 
                 var info = new ComponentInfo
                 {
+                    Id = GetPersistentId(component),
                     Type = component.GetType().FullName,
                     Enabled = GetEnabledState(component),
                     Properties = GatherSerializableProperties(component)
@@ -254,46 +307,50 @@ namespace UnitySemanticGraph.Editor.Exporter
             return elements.Count > 0 ? (object)elements : null;
         }
 
-        private static string BuildToml(IReadOnlyList<GameObjectInfo> gameObjects)
+        /// <summary>
+        /// データをストリーム経由で直接ファイルに書き込みます。
+        /// 巨大な文字列をメモリに生成するのを避けます。
+        /// </summary>
+        private static void WriteToml(string filePath, IReadOnlyList<GameObjectInfo> gameObjects)
         {
-            var builder = new TomlWriter();
-            builder.AppendLine($"project = \"UnitySemanticGraph\"");
-            builder.AppendLine($"generatedAt = \"{DateTime.UtcNow:s}Z\"");
-            builder.AppendLine();
+            using var writer = new StreamWriter(filePath);
+
+            writer.WriteLine("project = \"UnitySemanticGraph\"");
+            writer.WriteLine();
 
             for (var index = 0; index < gameObjects.Count; index++)
             {
                 var go = gameObjects[index];
-                builder.AppendLine("[[gameObjects]]");
-                builder.AppendLine($"path = \"{EscapeTomlString(go.Path)}\"");
-                builder.AppendLine($"name = \"{EscapeTomlString(go.Name)}\"");
-                builder.AppendLine($"parent = \"{EscapeTomlString(go.ParentPath)}\"");
+                writer.WriteLine("[[gameObjects]]");
+                writer.WriteLine($"id = \"{EscapeTomlString(go.Id)}\"");
+                writer.WriteLine($"path = \"{EscapeTomlString(go.Path)}\"");
+                writer.WriteLine($"name = \"{EscapeTomlString(go.Name)}\"");
+                writer.WriteLine($"parent = \"{EscapeTomlString(go.ParentPath)}\"");
 
                 if (go.Components.Count > 0)
                 {
                     for (var componentIndex = 0; componentIndex < go.Components.Count; componentIndex++)
                     {
                         var component = go.Components[componentIndex];
-                        builder.AppendLine("[[gameObjects.components]]");
-                        builder.AppendLine($"type = \"{EscapeTomlString(component.Type)}\"");
-                        builder.AppendLine($"enabled = {component.Enabled.ToString().ToLowerInvariant()}");
+                        writer.WriteLine("[[gameObjects.components]]");
+                        writer.WriteLine($"id = \"{EscapeTomlString(component.Id)}\"");
+                        writer.WriteLine($"type = \"{EscapeTomlString(component.Type)}\"");
+                        writer.WriteLine($"enabled = {component.Enabled.ToString().ToLowerInvariant()}");
 
                         if (component.Properties.Count > 0)
                         {
-                            builder.AppendLine("[gameObjects.components.properties]");
+                            writer.WriteLine("[gameObjects.components.properties]");
                             foreach (var property in component.Properties)
                             {
-                                builder.AppendLine($"{EscapeTomlKey(property.Key)} = {FormatTomlValue(property.Value)}");
+                                writer.WriteLine($"{EscapeTomlKey(property.Key)} = {FormatTomlValue(property.Value)}");
                             }
-                            builder.AppendLine();
+                            writer.WriteLine();
                         }
                     }
                 }
 
-                builder.AppendLine();
+                writer.WriteLine();
             }
-
-            return builder.ToString();
         }
 
         private static string FormatTomlValue(object value)
@@ -347,6 +404,55 @@ namespace UnitySemanticGraph.Editor.Exporter
             return key.Replace(" ", "_").Replace("-", "_");
         }
 
+        /// <summary>
+        /// 簡易的な TOML パーサー。
+        /// 既存のファイルを読み込み、GameObjectInfo のリストを復元します。
+        /// </summary>
+        private static List<GameObjectInfo> ParseToml(string filePath)
+        {
+            var results = new List<GameObjectInfo>();
+            GameObjectInfo currentGo = null;
+
+            // File.ReadLines は一度に全行をメモリに載せず、一行ずつ処理します
+            foreach (var line in File.ReadLines(filePath))
+            {
+                var trimmed = line.Trim();
+                if (trimmed == "[[gameObjects]]")
+                {
+                    currentGo = new GameObjectInfo { Components = new List<ComponentInfo>() };
+                    results.Add(currentGo);
+                }
+                else if (currentGo != null && trimmed.StartsWith("path = \""))
+                {
+                    currentGo.Path = trimmed.Split('"')[1].Replace("\\\\", "\\").Replace("\\\"", "\"");
+                }
+                else if (currentGo != null && trimmed.StartsWith("name = \""))
+                {
+                    currentGo.Name = trimmed.Split('"')[1].Replace("\\\\", "\\").Replace("\\\"", "\"");
+                }
+                else if (currentGo != null && trimmed.StartsWith("parent = \""))
+                {
+                    currentGo.ParentPath = trimmed.Split('"')[1].Replace("\\\\", "\\").Replace("\\\"", "\"");
+                }
+                else if (currentGo != null && trimmed.StartsWith("id = \""))
+                {
+                    currentGo.Id = trimmed.Split('"')[1];
+                }
+                // コンポーネントやプロパティの完全な復元にはより高度な解析が必要ですが、
+                // 差分更新の「既存ノードの維持」目的であればパスの特定が最優先となります。
+            }
+            return results;
+        }
+
+        /// <summary>
+        /// Unity の GlobalObjectId を使用して、エディタセッションを跨いで不変な ID を取得します。
+        /// </summary>
+        private static PersistentId GetPersistentId(UnityEngine.Object obj)
+        {
+            if (obj == null) return string.Empty;
+            return GlobalObjectId.GetGlobalObjectIdSlow(obj).ToString();
+        }
+
         private static string GetGameObjectPath(GameObject gameObject)
         {
             var path = gameObject.name;
@@ -360,34 +466,26 @@ namespace UnitySemanticGraph.Editor.Exporter
             return path;
         }
 
-        private sealed class GameObjectInfo
+        private sealed class GameObjectInfo : IGameObjectInfo
         {
+            public PersistentId Id { get; set; }
             public string Name { get; set; }
             public string Path { get; set; }
             public string ParentPath { get; set; }
-            public IReadOnlyList<ComponentInfo> Components { get; set; }
+            public IReadOnlyList<ComponentInfo> Components { get; set; } = Array.Empty<ComponentInfo>();
         }
 
         private sealed class ComponentInfo
         {
+            public PersistentId Id { get; set; }
             public string Type { get; set; }
             public bool Enabled { get; set; }
             public IReadOnlyDictionary<string, object> Properties { get; set; }
         }
 
-        private sealed class TomlWriter
+        private interface IGameObjectInfo
         {
-            private readonly StringWriter _writer = new StringWriter();
-
-            public void AppendLine(string line = "")
-            {
-                _writer.WriteLine(line);
-            }
-
-            public override string ToString()
-            {
-                return _writer.ToString();
-            }
+            IReadOnlyList<ComponentInfo> Components { get; }
         }
     }
 }
