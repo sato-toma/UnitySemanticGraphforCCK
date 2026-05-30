@@ -404,7 +404,7 @@ GameObject:
   - component: {fileID: 1376979813}
   - component: {fileID: 1376979814}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: Despawn Height
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -448,7 +448,7 @@ GameObject:
   - component: {fileID: 1641711192}
   - component: {fileID: 1641711193}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: Spawn Point
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

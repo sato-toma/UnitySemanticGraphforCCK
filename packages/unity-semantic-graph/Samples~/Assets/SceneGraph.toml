@@ -1,0 +1,48 @@
+project = "UnitySemanticGraph"
+
+[[gameObjects]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-484832227-0"
+path = "Floor"
+name = "Floor"
+parent = ""
+
+[[gameObjects]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-569126640-0"
+path = "Floor/Cube"
+name = "Cube"
+parent = "Floor"
+
+[[gameObjects]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-927880994-0"
+path = "System"
+name = "System"
+parent = ""
+
+[[gameObjects]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-1376979814-0"
+path = "System/Despawn Height"
+name = "Despawn Height"
+parent = "System"
+
+[[gameObjects]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-1376979812-0"
+path = "System/Despawn Height"
+name = "Despawn Height"
+parent = "System"
+[[gameObjects.components]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-1376979814-0"
+type = "ClusterVR.CreatorKit.World.Implements.DespawnHeights.DespawnHeight"
+enabled = true
+
+[[gameObjects]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-1328207003-0"
+path = "System/Directional Light"
+name = "Directional Light"
+parent = "System"
+
+[[gameObjects]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-1641711193-0"
+path = "System/Spawn Point"
+name = "Spawn Point"
+parent = "System"
+

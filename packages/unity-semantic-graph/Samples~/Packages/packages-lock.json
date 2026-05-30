@@ -1,5 +1,11 @@
 {
   "dependencies": {
+    "com.azuki.unity-semantic-graph": {
+      "version": "file:E:/_cluster/2026/UnitySemanticGraphforCCK/packages/unity-semantic-graph",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {}
+    },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
       "depth": 0,
