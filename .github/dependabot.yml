@@ -1,0 +1,24 @@
+version: 2
+
+updates:
+  - package-ecosystem: "npm"
+    directory: "/packages/ts-analyzer"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    cooldown:
+      default-days: 5
+    labels:
+      - "dependabot"
+    assignees:
+      - sato-toma
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 5
+    assignees:
+      - sato-toma
+    labels:
+      - "dependabot"

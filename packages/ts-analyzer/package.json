@@ -1,0 +1,28 @@
+{
+    "name": "ts-cck-analyzer",
+    "version": "1.0.0",
+    "description": "ClusterScript TypeScript analyzer with component constraint validation",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "analyze": "node dist/cli.js",
+        "dev": "tsc --watch",
+        "update-types": "node ./scripts/update-types.js"
+    },
+    "keywords": [
+        "cluster",
+        "clusterscript",
+        "typescript",
+        "static-analysis",
+        "unity-components"
+    ],
+    "author": "",
+    "dependencies": {
+        "js-toml": "^1.1.0",
+        "typescript": "^6.0.3"
+    },
+    "devDependencies": {
+        "@types/node": "^25.9.0"
+    }
+}
