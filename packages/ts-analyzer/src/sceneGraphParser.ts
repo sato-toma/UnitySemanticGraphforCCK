@@ -1,6 +1,5 @@
-import TOML from "js-toml";
+import { load as parseToml } from "js-toml";
 import * as fs from "fs";
-import * as path from "path";
 import { SceneGraph, GameObject, Component } from "./types";
 
 /**
@@ -19,8 +18,7 @@ export class SceneGraphParser {
    * TOML文字列をパース
    */
   static parse(content: string): SceneGraph {
-    // js-toml typings may not export `parse` on the imported symbol, coerce to any
-    const parsed = (TOML as any).parse(content) as any;
+    const parsed = parseToml(content) as any;
 
     const sceneGraph: SceneGraph = {
       project: parsed.project || "Unknown",

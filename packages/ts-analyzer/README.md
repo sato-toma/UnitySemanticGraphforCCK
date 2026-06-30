@@ -19,6 +19,20 @@ npm install
 npm run build
 ```
 
+## テスト
+
+```bash
+cd packages/ts-analyzer
+npm test
+```
+
+CI では以下のコマンドを実行することでビルドとテストを検証します。
+
+```bash
+cd packages/ts-analyzer
+npm run verify
+```
+
 ## 使用方法
 
 ### コマンド
