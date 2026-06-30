@@ -30,11 +30,6 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Package manager lock files
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
-
 # Testing
 coverage/
 .nyc_output/

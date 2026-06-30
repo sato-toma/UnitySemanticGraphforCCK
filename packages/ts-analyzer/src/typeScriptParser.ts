@@ -101,13 +101,12 @@ export class TypeScriptCodeParser {
   /**
    * `$.state.*.push(...)` のようなstateの直接ミューテーションを検出
    */
-  static extractInvalidStateMutations(filePath: string): Array<{
+  static extractInvalidStateMutationsFromString(content: string): Array<{
     line: number;
     column: number;
     propertyName: string;
     fullExpression: string;
   }> {
-    const content = fs.readFileSync(filePath, "utf-8");
     const lines = content.split("\n");
     const results: Array<{
       line: number;
@@ -144,6 +143,16 @@ export class TypeScriptCodeParser {
     });
 
     return results;
+  }
+
+  static extractInvalidStateMutations(filePath: string): Array<{
+    line: number;
+    column: number;
+    propertyName: string;
+    fullExpression: string;
+  }> {
+    const content = fs.readFileSync(filePath, "utf-8");
+    return this.extractInvalidStateMutationsFromString(content);
   }
 
   /**

@@ -8,6 +8,8 @@
         "build": "tsc",
         "analyze": "node dist/cli.js",
         "dev": "tsc --watch",
+        "test": "vitest run",
+        "verify": "npm run build && npm run test",
         "update-types": "node ./scripts/update-types.js"
     },
     "keywords": [
@@ -23,6 +25,7 @@
         "typescript": "^6.0.3"
     },
     "devDependencies": {
-        "@types/node": "^25.9.0"
+        "@types/node": "^26.0.0",
+        "vitest": "^4.1.9"
     }
 }
