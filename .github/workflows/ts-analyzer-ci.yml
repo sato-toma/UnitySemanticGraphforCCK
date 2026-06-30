@@ -7,6 +7,7 @@ on:
   pull_request:
     paths:
       - 'packages/ts-analyzer/**'
+  workflow_dispatch:
 
 jobs:
   test:
