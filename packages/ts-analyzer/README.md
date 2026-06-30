@@ -227,9 +227,9 @@ npm run build
 - ファイルパスが正しいか確認してください
 - 相対パスまたは絶対パスを使用してください
 
-### "Cannot find module 'js-toml'"
+### "Cannot find module '@iarna/toml'"
 ```bash
-npm install js-toml
+npm install @iarna/toml
 ```
 
 ### "Script file not found"
