@@ -1,4 +1,4 @@
-import { load as parseToml } from "js-toml";
+import { parse as parseToml } from "@iarna/toml";
 import * as fs from "fs";
 import { SceneGraph, GameObject, Component } from "./types";
 
