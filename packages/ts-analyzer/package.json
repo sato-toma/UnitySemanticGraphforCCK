@@ -4,6 +4,9 @@
     "description": "ClusterScript TypeScript analyzer with component constraint validation",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
+    "bin": {
+        "ts-analyzer": "dist/cli.js"
+    },
     "scripts": {
         "build": "tsc",
         "analyze": "node dist/cli.js",
