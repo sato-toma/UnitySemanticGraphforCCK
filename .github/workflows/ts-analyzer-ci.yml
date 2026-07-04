@@ -20,12 +20,13 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '24'
-          # cache: 'npm'
+          cache: 'npm'
           cache-dependency-path: packages/ts-analyzer/package-lock.json
 
       - name: Install dependencies
         working-directory: packages/ts-analyzer
-        run: npm ci
+        # run: npm ci
+        run: npm install
 
       - name: Build package
         working-directory: packages/ts-analyzer
