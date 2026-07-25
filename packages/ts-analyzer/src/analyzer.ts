@@ -47,6 +47,7 @@ export class ClusterScriptAnalyzer {
       const validation = ConstraintValidator.validateGameObject(
         gameObject,
         constraints,
+        this.sceneGraph,
       );
 
       if (!validation.isValid) {
@@ -62,8 +63,10 @@ export class ClusterScriptAnalyzer {
           message: `Method '${call.methodName}' requires components: ${requiredComponents.join(", ")}`,
           apiCall: call.methodName,
           requiredComponents: requiredComponents,
-          availableComponents: gameObject.components
-            .filter((c) => c.enabled)
+          availableComponents: SceneGraphParser.getEnabledComponentsInHierarchy(
+            this.sceneGraph,
+            gameObject,
+          )
             .map((c) => c.type),
         });
       }

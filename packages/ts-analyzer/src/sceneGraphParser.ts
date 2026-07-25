@@ -75,6 +75,42 @@ export class SceneGraphParser {
   }
 
   /**
+   * 指定オブジェクトの祖先を取得する
+   */
+  static getGameObjectAncestors(
+    sceneGraph: SceneGraph,
+    gameObject: GameObject,
+  ): GameObject[] {
+    const ancestors: GameObject[] = [];
+    let current = gameObject;
+
+    while (current.parent) {
+      const parent = this.getGameObjectById(sceneGraph, current.parent);
+      if (!parent) {
+        break;
+      }
+      ancestors.push(parent);
+      current = parent;
+    }
+
+    return ancestors;
+  }
+
+  /**
+   * 指定オブジェクトと祖先を含めた有効なコンポーネントを取得する
+   */
+  static getEnabledComponentsInHierarchy(
+    sceneGraph: SceneGraph,
+    gameObject: GameObject,
+  ): Component[] {
+    const components = [...gameObject.components];
+    for (const ancestor of this.getGameObjectAncestors(sceneGraph, gameObject)) {
+      components.push(...ancestor.components);
+    }
+    return components.filter((comp) => comp.enabled);
+  }
+
+  /**
    * 特定のコンポーネントを持つGameObjectをすべて取得
    */
   static getGameObjectsWithComponent(
