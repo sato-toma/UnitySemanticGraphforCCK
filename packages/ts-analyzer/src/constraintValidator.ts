@@ -32,13 +32,21 @@ export class ConstraintValidator {
     for (const constraint of constraints) {
       switch (constraint.requirement) {
         case "required":
-          if (!availableComponents.has(constraint.componentType)) {
+          if (
+            !Array.from(availableComponents).some(
+              (componentType) => componentType === constraint.componentType,
+            )
+          ) {
             missingRequired.push(constraint.componentType);
           }
           break;
 
         case "forbidden":
-          if (availableComponents.has(constraint.componentType)) {
+          if (
+            Array.from(availableComponents).some(
+              (componentType) => componentType === constraint.componentType,
+            )
+          ) {
             extraForbidden.push(constraint.componentType);
           }
           break;

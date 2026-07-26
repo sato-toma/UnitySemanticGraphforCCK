@@ -537,7 +537,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e61061896c654489a41575fc291bf4a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ClusterVR.CreatorKit.Item.Implements::ClusterVR.CreatorKit.Item.Implements.ScriptableItem
-  sourceCodeAsset: {fileID: 5022602860645237092, guid: e7a0b0b984bf4a04ea8bef5270e12593,
+  sourceCodeAsset: {fileID: 5022602860645237092, guid: 217e23715c16f4d4dab9cbd6132e90bd,
     type: 3}
   sourceCode: 
 --- !u!114 &1369298477

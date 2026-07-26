@@ -125,6 +125,19 @@ export class SceneGraphParser {
   }
 
   /**
+   * ScriptableItem の Source_Code_Asset を参照する GameObject を検索
+   */
+  static getGameObjectsWithScriptableItem(sceneGraph: SceneGraph): GameObject[] {
+    return sceneGraph.gameObjects.filter((obj) =>
+      obj.components.some(
+        (comp) =>
+          comp.type === "ClusterVR.CreatorKit.Item.Implements.ScriptableItem" &&
+          comp.enabled,
+      ),
+    );
+  }
+
+  /**
    * 特定のコンポーネントを持たないGameObjectをすべて取得
    */
   static getGameObjectsWithoutComponent(

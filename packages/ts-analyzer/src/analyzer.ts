@@ -1,4 +1,4 @@
-import { SceneGraph, AnalysisResult, ValidationIssue } from "./types";
+import { SceneGraph, AnalysisResult, ValidationIssue, GameObject } from "./types";
 import { SceneGraphParser } from "./sceneGraphParser";
 import { TypeScriptCodeParser } from "./typeScriptParser";
 import { ConstraintValidator } from "./constraintValidator";
@@ -17,9 +17,16 @@ export class ClusterScriptAnalyzer {
     this.sceneGraph = SceneGraphParser.parseFile(sceneGraphPath);
   }
 
-  /**
-   * TypeScriptファイルを解析
-   */
+  private getCandidateGameObjects(): GameObject[] {
+    const scriptableObjects = SceneGraphParser.getGameObjectsWithScriptableItem(
+      this.sceneGraph,
+    );
+
+    return scriptableObjects.length > 0
+      ? scriptableObjects
+      : this.sceneGraph.gameObjects;
+  }
+
   analyzeTypeScriptFile(tsFilePath: string): AnalysisResult {
     const apiCalls = TypeScriptCodeParser.extractApiCalls(tsFilePath);
     const issues: ValidationIssue[] = [];
@@ -35,13 +42,23 @@ export class ClusterScriptAnalyzer {
         continue;
       }
 
-      // SceneGraphにマッチするGameObjectを取得（ワールドアイテムの場合）
-      // 実装例: ワールドアイテムの場合、最初のGameObjectをチェック
-      const gameObject = this.sceneGraph.gameObjects[0];
+      const candidateGameObjects = this.getCandidateGameObjects();
+      const fallbackGameObject = candidateGameObjects[0] ?? this.sceneGraph.gameObjects[0];
 
-      if (!gameObject) {
+      if (!fallbackGameObject) {
         continue;
       }
+
+      const matchingGameObject = candidateGameObjects.find((candidate) => {
+        const validation = ConstraintValidator.validateGameObject(
+          candidate,
+          constraints,
+          this.sceneGraph,
+        );
+        return validation.isValid;
+      });
+
+      const gameObject = matchingGameObject ?? fallbackGameObject;
 
       // 制約を検証
       const validation = ConstraintValidator.validateGameObject(
