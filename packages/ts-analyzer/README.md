@@ -11,6 +11,12 @@ TypeScript で実装した ClusterScript コードを、SceneGraph.toml で定�
 3. **コンポーネント制約の検証** - API に必要なコンポーネントがセットされているかを確認
 4. **レポート生成** - 問題点と推奨設定を出力
 
+## 最近の追加
+
+- **ルールをカテゴリ単位で分割** - 物理系、インタラクション系、移動系などのチェックを個別ファイルで管理できます
+- **state 変更の静的検出** - `$.state.items.push(...)` や `$.state.profile.name = ...` のような直接変更を検出し、再代入が必要であることを警告します
+- **GrabbableItem などのコンポーネント依存ルール** - `onGrab()` / `onUse()` などの検証ルールを独立して追加・編集できます
+
 ## インストール
 
 ```bash
@@ -178,6 +184,11 @@ interface ValidationIssue {
 - `velocity` - Rigidbody 必須
 - `angularVelocity` - Rigidbody 必須
 - `useGravity` - Rigidbody 必須
+
+### state 変更チェック
+- `$.state.items.push(...)` などの配列メソッドによる直接変更
+- `$.state.profile.name = ...` のようなネストしたプロパティ更新
+- これらは再代入が必要なため、`const v = $.state.items; v.push(...); $.state.items = v;` のような書き方を推奨します
 
 ## 制約システム
 

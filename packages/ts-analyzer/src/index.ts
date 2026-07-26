@@ -4,6 +4,7 @@ export { TypeScriptCodeParser } from "./typeScriptParser";
 export { ConstraintValidator } from "./constraintValidator";
 export { ClusterScriptDefinitions } from "./clusterScriptDefinitions";
 export { ClusterScriptAnalyzer } from "./analyzer";
+export { ruleSets, stateMutationRuleSets } from "./rules";
 
 // Type exports
 export type {

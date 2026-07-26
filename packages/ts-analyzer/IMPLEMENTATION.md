@@ -68,6 +68,13 @@ console.log(SceneGraphParser.visualizeHierarchy(sceneGraph));
 ### 3. clusterScriptDefinitions.ts
 **ClusterScript API と制約定義**
 
+ルール定義は [src/rules](src/rules) 配下に分離されており、以下のようにカテゴリ単位で管理しています。
+
+- [src/rules/physics.ts](src/rules/physics.ts) - Rigidbody などの物理系ルール
+- [src/rules/interactions.ts](src/rules/interactions.ts) - GrabbableItem / RidableItem などのインタラクション系ルール
+- [src/rules/movement.ts](src/rules/movement.ts) - MovableItem などの移動系ルール
+- [src/rules/stateMutation.ts](src/rules/stateMutation.ts) - `$.state.*` の直接変更を検出するルール
+
 ```typescript
 // メソッドの制約を取得
 const constraints = ClusterScriptDefinitions.getMethodConstraints("addForce");
@@ -118,6 +125,14 @@ const results = ConstraintValidator.batchValidateMethods(
 ### 5. typeScriptParser.ts
 **TypeScript コード解析**
 
+このモジュールでは、正規表現ベースで以下を抽出します。
+
+- API コール
+- `$.state.*` への直接変更パターン
+- `$.state.profile.name = ...` のようなネストした更新
+
+特に state の変更については、再代入が必要なケースを検出してエラーとして報告します。
+
 ```typescript
 // API コールを抽出
 const apiCalls = TypeScriptCodeParser.extractApiCalls("script.ts");
@@ -146,6 +161,8 @@ const complexity = TypeScriptCodeParser.calculateCodeComplexity(code);
 
 ### 6. analyzer.ts
 **統合解析エンジン**
+
+解析結果には、通常のコンポーネント制約違反に加えて、`INVALID_STATE_MUTATION` というコードで state の直接変更違反も含めます。これにより、ClusterScript の仕様に沿った書き方を静的に検出できます。
 
 ```typescript
 const analyzer = new ClusterScriptAnalyzer("SceneGraph.toml");
