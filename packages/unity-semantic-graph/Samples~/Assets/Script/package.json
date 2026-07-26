@@ -1,0 +1,11 @@
+{
+  "name": "unity-semantic-graph-samplescript",
+  "version": "1.0.0",
+  "private": true,
+  "devDependencies": {
+    "typescript": "7.0.2"
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.json"
+  }
+}

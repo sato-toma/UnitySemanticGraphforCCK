@@ -2,18 +2,23 @@
 
 # ts-analyzer のテストスクリプト
 
-SCENE_GRAPH_PATH="../../../unity-semantic-graph/Samples~/Assets/SceneGraph.toml"
-SAMPLE_TS_PATH="./sample.ts"
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PACKAGE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+SCENE_GRAPH_PATH="$REPO_ROOT/packages/unity-semantic-graph/Samples~/Assets/SceneGraph.toml"
+SAMPLE_TS_PATH="$REPO_ROOT/packages/unity-semantic-graph/Samples~/Assets/Script/src/onGrabScript.ts"
 
 echo "=== ts-analyzer Test Suite ==="
 echo ""
 
 # ビルド
 echo "Building ts-analyzer..."
-cd ..
+cd "$PACKAGE_DIR"
 npm install
 npm run build
-cd examples
+cd "$SCRIPT_DIR"
 
 if [ ! -f "$SCENE_GRAPH_PATH" ]; then
   echo "⚠️  Warning: SceneGraph.toml not found at $SCENE_GRAPH_PATH"

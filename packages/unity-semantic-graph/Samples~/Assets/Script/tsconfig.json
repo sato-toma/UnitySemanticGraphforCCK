@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "node20",
+    "outDir": "dist",
+    "rootDir": "src",
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "typeRoots": ["./external", "./node_modules/@types"]
+  },
+  "include": ["src/**/*.ts", "external/**/*.d.ts"],
+  "exclude": ["node_modules", "**/*.js"]
+}

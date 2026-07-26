@@ -16,6 +16,32 @@ type = "UnityEngine.Rigidbody"
 enabled = true
 `;
 
+const hierarchyToml = `
+project = "TestProject"
+
+[[gameObjects]]
+id = "parent-obj"
+path = "ParentItem"
+name = "ParentItem"
+parent = ""
+
+[[gameObjects.components]]
+id = "comp-parent-1"
+type = "ClusterVR.CreatorKit.Item.GrabbableItem"
+enabled = true
+
+[[gameObjects]]
+id = "child-obj"
+path = "ParentItem/ChildItem"
+name = "ChildItem"
+parent = "parent-obj"
+
+[[gameObjects.components]]
+id = "comp-child-1"
+type = "UnityEngine.Rigidbody"
+enabled = true
+`;
+
 describe("SceneGraphParser", () => {
   it("parses a simple SceneGraph TOML", () => {
     const sceneGraph = SceneGraphParser.parse(sampleToml);
@@ -34,5 +60,30 @@ describe("SceneGraphParser", () => {
     );
     expect(rigidbodies).toHaveLength(1);
     expect(rigidbodies[0]!.name).toBe("TestItem");
+  });
+
+  it("retrieves ancestors and hierarchy components", () => {
+    const sceneGraph = SceneGraphParser.parse(hierarchyToml);
+    const childObject = sceneGraph.gameObjects.find(
+      (obj) => obj.id === "child-obj",
+    )!;
+
+    const ancestors = SceneGraphParser.getGameObjectAncestors(
+      sceneGraph,
+      childObject,
+    );
+    expect(ancestors).toHaveLength(1);
+    expect(ancestors[0]!.id).toBe("parent-obj");
+
+    const enabledComponents = SceneGraphParser.getEnabledComponentsInHierarchy(
+      sceneGraph,
+      childObject,
+    );
+    expect(enabledComponents.map((c) => c.type)).toEqual(
+      expect.arrayContaining([
+        "UnityEngine.Rigidbody",
+        "ClusterVR.CreatorKit.Item.GrabbableItem",
+      ]),
+    );
   });
 });

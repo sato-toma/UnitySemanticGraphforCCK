@@ -1,9 +1,25 @@
-import { SceneGraph, AnalysisResult, ValidationIssue } from "./types";
+import { SceneGraph, AnalysisResult, ValidationIssue, GameObject } from "./types";
 import { SceneGraphParser } from "./sceneGraphParser";
 import { TypeScriptCodeParser } from "./typeScriptParser";
 import { ConstraintValidator } from "./constraintValidator";
 import { ClusterScriptDefinitions } from "./clusterScriptDefinitions";
 import * as path from "path";
+
+const ANSI = {
+  reset: "\u001b[0m",
+  red: "\u001b[31m",
+  yellow: "\u001b[33m",
+  green: "\u001b[32m",
+  bold: "\u001b[1m",
+};
+
+function colorize(text: string, color: string): string {
+  if (!process.stdout.isTTY || process.env.NO_COLOR !== undefined) {
+    return text;
+  }
+
+  return `${color}${text}${ANSI.reset}`;
+}
 
 /**
  * 統合的なTypeScript静的解析エンジン
@@ -17,9 +33,16 @@ export class ClusterScriptAnalyzer {
     this.sceneGraph = SceneGraphParser.parseFile(sceneGraphPath);
   }
 
-  /**
-   * TypeScriptファイルを解析
-   */
+  private getCandidateGameObjects(): GameObject[] {
+    const scriptableObjects = SceneGraphParser.getGameObjectsWithScriptableItem(
+      this.sceneGraph,
+    );
+
+    return scriptableObjects.length > 0
+      ? scriptableObjects
+      : this.sceneGraph.gameObjects;
+  }
+
   analyzeTypeScriptFile(tsFilePath: string): AnalysisResult {
     const apiCalls = TypeScriptCodeParser.extractApiCalls(tsFilePath);
     const issues: ValidationIssue[] = [];
@@ -35,18 +58,29 @@ export class ClusterScriptAnalyzer {
         continue;
       }
 
-      // SceneGraphにマッチするGameObjectを取得（ワールドアイテムの場合）
-      // 実装例: ワールドアイテムの場合、最初のGameObjectをチェック
-      const gameObject = this.sceneGraph.gameObjects[0];
+      const candidateGameObjects = this.getCandidateGameObjects();
+      const fallbackGameObject = candidateGameObjects[0] ?? this.sceneGraph.gameObjects[0];
 
-      if (!gameObject) {
+      if (!fallbackGameObject) {
         continue;
       }
+
+      const matchingGameObject = candidateGameObjects.find((candidate) => {
+        const validation = ConstraintValidator.validateGameObject(
+          candidate,
+          constraints,
+          this.sceneGraph,
+        );
+        return validation.isValid;
+      });
+
+      const gameObject = matchingGameObject ?? fallbackGameObject;
 
       // 制約を検証
       const validation = ConstraintValidator.validateGameObject(
         gameObject,
         constraints,
+        this.sceneGraph,
       );
 
       if (!validation.isValid) {
@@ -62,8 +96,10 @@ export class ClusterScriptAnalyzer {
           message: `Method '${call.methodName}' requires components: ${requiredComponents.join(", ")}`,
           apiCall: call.methodName,
           requiredComponents: requiredComponents,
-          availableComponents: gameObject.components
-            .filter((c) => c.enabled)
+          availableComponents: SceneGraphParser.getEnabledComponentsInHierarchy(
+            this.sceneGraph,
+            gameObject,
+          )
             .map((c) => c.type),
         });
       }
@@ -131,14 +167,25 @@ export class ClusterScriptAnalyzer {
         lines.push(`   Warnings: ${result.summary.warningCount}`);
 
         for (const issue of result.issues) {
-          lines.push(
-            `   [${issue.severity.toUpperCase()}] Line ${issue.line}:${issue.column}`,
+          const severityColor =
+            issue.severity === "error" ? ANSI.red : ANSI.yellow;
+          const severityLabel = colorize(
+            `[${issue.severity.toUpperCase()}]`,
+            severityColor,
           );
-          lines.push(`     API: ${issue.apiCall}`);
-          lines.push(`     Message: ${issue.message}`);
-          lines.push(`     Required: ${issue.requiredComponents.join(", ")}`);
+
+          lines.push(`   ${severityLabel} Line ${issue.line}:${issue.column}`);
           lines.push(
-            `     Available: ${issue.availableComponents.join(", ") || "none"}`,
+            `     ${colorize("API:", severityColor)} ${colorize(issue.apiCall, severityColor)}`,
+          );
+          lines.push(
+            `     ${colorize("Message:", severityColor)} ${colorize(issue.message, severityColor)}`,
+          );
+          lines.push(
+            `     ${colorize("Required:", severityColor)} ${colorize(issue.requiredComponents.join(", "), severityColor)}`,
+          );
+          lines.push(
+            `     ${colorize("Available:", severityColor)} ${colorize(issue.availableComponents.join(", ") || "none", severityColor)}`,
           );
         }
 
@@ -148,13 +195,13 @@ export class ClusterScriptAnalyzer {
       }
     }
 
-    lines.push("\n=== Summary ===");
+    lines.push(`\n${colorize("=== Summary ===", ANSI.bold)}`);
     lines.push(`Total Issues: ${totalIssues}`);
-    lines.push(`Total Errors: ${totalErrors}`);
-    lines.push(`Total Warnings: ${totalWarnings}`);
+    lines.push(`${colorize("Total Errors", ANSI.red)}: ${totalErrors}`);
+    lines.push(`${colorize("Total Warnings", ANSI.yellow)}: ${totalWarnings}`);
 
     if (totalIssues === 0) {
-      lines.push("✅ No issues found!");
+      lines.push(colorize("✅ No issues found!", ANSI.green));
     }
 
     return lines.join("\n");

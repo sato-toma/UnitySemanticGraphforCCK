@@ -1,18 +1,21 @@
 @echo off
 REM ts-analyzer のテストスクリプト (Windows)
 
-set SCENE_GRAPH_PATH=..\..\..\unity-semantic-graph\Samples~\Assets\SceneGraph.toml
-set SAMPLE_TS_PATH=.\sample.ts
+set "SCRIPT_DIR=%~dp0"
+set "PACKAGE_DIR=%SCRIPT_DIR%.."
+set "REPO_ROOT=%SCRIPT_DIR%..\..\.."
+set "SCENE_GRAPH_PATH=%REPO_ROOT%\packages\unity-semantic-graph\Samples~\Assets\SceneGraph.toml"
+set "SAMPLE_TS_PATH=%REPO_ROOT%\packages\unity-semantic-graph\Samples~\Assets\Script\src\onGrabScript.ts"
 
 echo === ts-analyzer Test Suite ===
 echo.
 
 REM ビルド
 echo Building ts-analyzer...
-cd ..
+cd /d "%PACKAGE_DIR%"
 call npm install
 call npm run build
-cd examples
+cd /d "%SCRIPT_DIR%"
 
 if not exist "%SCENE_GRAPH_PATH%" (
   echo Warning: SceneGraph.toml not found at %SCENE_GRAPH_PATH%

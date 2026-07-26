@@ -11,6 +11,22 @@ import { ClusterScriptDefinitions } from "./clusterScriptDefinitions";
  * CLI ツール - ClusterScript静的解析
  */
 
+const ANSI = {
+  reset: "\u001b[0m",
+  red: "\u001b[31m",
+  yellow: "\u001b[33m",
+  green: "\u001b[32m",
+  bold: "\u001b[1m",
+};
+
+function colorize(text: string, color: string): string {
+  if (!process.stdout.isTTY || process.env.NO_COLOR !== undefined) {
+    return text;
+  }
+
+  return `${color}${text}${ANSI.reset}`;
+}
+
 function printUsage() {
   console.log(`
 Usage: ts-analyzer <command> [options]
@@ -69,27 +85,32 @@ function analyzeCommand(args: string[]) {
     const analyzer = new ClusterScriptAnalyzer(sceneGraphPathNonNull);
     const result = analyzer.analyzeTypeScriptFile(tsFilePathNonNull);
 
-    console.log(`\n=== Analysis Results ===\n`);
+    console.log(colorize(`\n=== Analysis Results ===\n`, ANSI.bold));
     console.log(`File: ${tsFilePathNonNull}`);
     console.log(`Issues: ${result.summary.totalIssues}`);
-    console.log(`Errors: ${result.summary.errorCount}`);
-    console.log(`Warnings: ${result.summary.warningCount}\n`);
+    console.log(`${colorize("Errors", ANSI.red)}: ${result.summary.errorCount}`);
+    console.log(`${colorize("Warnings", ANSI.yellow)}: ${result.summary.warningCount}\n`);
 
     if (result.issues.length > 0) {
-      console.log("Issues:");
+      console.log(colorize("Issues:", ANSI.bold));
       for (const issue of result.issues) {
-        console.log(
-          `  [${issue.severity.toUpperCase()}] Line ${issue.line}:${issue.column}`,
+        const severityColor =
+          issue.severity === "error" ? ANSI.red : ANSI.yellow;
+        const severityLabel = colorize(
+          `[${issue.severity.toUpperCase()}]`,
+          severityColor,
         );
-        console.log(`    API: ${issue.apiCall}`);
-        console.log(`    Message: ${issue.message}`);
-        console.log(`    Required: ${issue.requiredComponents.join(", ")}`);
+
+        console.log(`  ${severityLabel} Line ${issue.line}:${issue.column}`);
+        console.log(`    ${colorize("API:", severityColor)} ${colorize(issue.apiCall, severityColor)}`);
+        console.log(`    ${colorize("Message:", severityColor)} ${colorize(issue.message, severityColor)}`);
+        console.log(`    ${colorize("Required:", severityColor)} ${colorize(issue.requiredComponents.join(", "), severityColor)}`);
         console.log(
-          `    Available: ${issue.availableComponents.join(", ") || "none"}\n`,
+          `    ${colorize("Available:", severityColor)} ${colorize(issue.availableComponents.join(", ") || "none", severityColor)}\n`,
         );
       }
     } else {
-      console.log("✅ No issues found!");
+      console.log(colorize("✅ No issues found!", ANSI.green));
     }
   } catch (error) {
     console.error("Error during analysis:", error);

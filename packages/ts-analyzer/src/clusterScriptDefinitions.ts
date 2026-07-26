@@ -116,7 +116,7 @@ export class ClusterScriptDefinitions {
       name: "onGrab",
       requiredComponents: [
         {
-          componentType: "ClusterVR.CreatorKit.Item.GrabbableItem",
+          componentType: "ClusterVR.CreatorKit.Item.Implements.GrabbableItem",
           requirement: "required",
         },
       ],
@@ -127,7 +127,7 @@ export class ClusterScriptDefinitions {
       name: "onUse",
       requiredComponents: [
         {
-          componentType: "ClusterVR.CreatorKit.Item.GrabbableItem",
+          componentType: "ClusterVR.CreatorKit.Item.Implements.GrabbableItem",
           requirement: "required",
         },
       ],
@@ -200,7 +200,7 @@ export class ClusterScriptDefinitions {
       name: "setPosition",
       requiredComponents: [
         {
-          componentType: "ClusterVR.CreatorKit.Item.MovableItem",
+          componentType: "ClusterVR.CreatorKit.Item.Implements.MovableItem",
           requirement: "required",
         },
       ],
@@ -213,7 +213,7 @@ export class ClusterScriptDefinitions {
       name: "setRotation",
       requiredComponents: [
         {
-          componentType: "ClusterVR.CreatorKit.Item.MovableItem",
+          componentType: "ClusterVR.CreatorKit.Item.Implements.MovableItem",
           requirement: "required",
         },
       ],

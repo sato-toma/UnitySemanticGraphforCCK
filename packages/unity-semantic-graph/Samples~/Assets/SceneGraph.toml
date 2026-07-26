@@ -25,6 +25,58 @@ type = "UnityEngine.BoxCollider"
 enabled = true
 
 [[gameObjects]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-1369298475-0"
+path = "onGrab"
+name = "onGrab"
+parent = ""
+[[gameObjects.components]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-1369298480-0"
+type = "ClusterVR.CreatorKit.Item.Implements.Item"
+enabled = true
+[gameObjects.components.properties]
+Item_Name = ""
+Size = [0, 0, 0]
+
+[[gameObjects.components]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-1369298479-0"
+type = "UnityEngine.Rigidbody"
+enabled = true
+[[gameObjects.components]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-1369298478-0"
+type = "ClusterVR.CreatorKit.Item.Implements.MovableItem"
+enabled = true
+[[gameObjects.components]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-1369298477-0"
+type = "ClusterVR.CreatorKit.Item.Implements.GrabbableItem"
+enabled = true
+[[gameObjects.components]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-1369298476-0"
+type = "ClusterVR.CreatorKit.Item.Implements.ScriptableItem"
+enabled = true
+[gameObjects.components.properties]
+Source_Code_Asset = "onGrabScript"
+Source_Code = ""
+
+
+[[gameObjects]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-676474044-0"
+path = "onGrab/Cube"
+name = "Cube"
+parent = "onGrab"
+[[gameObjects.components]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-676474048-0"
+type = "UnityEngine.MeshFilter"
+enabled = true
+[[gameObjects.components]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-676474047-0"
+type = "UnityEngine.MeshRenderer"
+enabled = true
+[[gameObjects.components]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-676474046-0"
+type = "UnityEngine.BoxCollider"
+enabled = true
+
+[[gameObjects]]
 id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-927880994-0"
 path = "System"
 name = "System"
