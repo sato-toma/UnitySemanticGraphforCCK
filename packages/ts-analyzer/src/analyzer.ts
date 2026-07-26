@@ -5,6 +5,22 @@ import { ConstraintValidator } from "./constraintValidator";
 import { ClusterScriptDefinitions } from "./clusterScriptDefinitions";
 import * as path from "path";
 
+const ANSI = {
+  reset: "\u001b[0m",
+  red: "\u001b[31m",
+  yellow: "\u001b[33m",
+  green: "\u001b[32m",
+  bold: "\u001b[1m",
+};
+
+function colorize(text: string, color: string): string {
+  if (!process.stdout.isTTY || process.env.NO_COLOR !== undefined) {
+    return text;
+  }
+
+  return `${color}${text}${ANSI.reset}`;
+}
+
 /**
  * 統合的なTypeScript静的解析エンジン
  * SceneGraph.tomlとTypeScriptコードを組み合わせて、
@@ -151,14 +167,25 @@ export class ClusterScriptAnalyzer {
         lines.push(`   Warnings: ${result.summary.warningCount}`);
 
         for (const issue of result.issues) {
-          lines.push(
-            `   [${issue.severity.toUpperCase()}] Line ${issue.line}:${issue.column}`,
+          const severityColor =
+            issue.severity === "error" ? ANSI.red : ANSI.yellow;
+          const severityLabel = colorize(
+            `[${issue.severity.toUpperCase()}]`,
+            severityColor,
           );
-          lines.push(`     API: ${issue.apiCall}`);
-          lines.push(`     Message: ${issue.message}`);
-          lines.push(`     Required: ${issue.requiredComponents.join(", ")}`);
+
+          lines.push(`   ${severityLabel} Line ${issue.line}:${issue.column}`);
           lines.push(
-            `     Available: ${issue.availableComponents.join(", ") || "none"}`,
+            `     ${colorize("API:", severityColor)} ${colorize(issue.apiCall, severityColor)}`,
+          );
+          lines.push(
+            `     ${colorize("Message:", severityColor)} ${colorize(issue.message, severityColor)}`,
+          );
+          lines.push(
+            `     ${colorize("Required:", severityColor)} ${colorize(issue.requiredComponents.join(", "), severityColor)}`,
+          );
+          lines.push(
+            `     ${colorize("Available:", severityColor)} ${colorize(issue.availableComponents.join(", ") || "none", severityColor)}`,
           );
         }
 
@@ -168,13 +195,13 @@ export class ClusterScriptAnalyzer {
       }
     }
 
-    lines.push("\n=== Summary ===");
+    lines.push(`\n${colorize("=== Summary ===", ANSI.bold)}`);
     lines.push(`Total Issues: ${totalIssues}`);
-    lines.push(`Total Errors: ${totalErrors}`);
-    lines.push(`Total Warnings: ${totalWarnings}`);
+    lines.push(`${colorize("Total Errors", ANSI.red)}: ${totalErrors}`);
+    lines.push(`${colorize("Total Warnings", ANSI.yellow)}: ${totalWarnings}`);
 
     if (totalIssues === 0) {
-      lines.push("✅ No issues found!");
+      lines.push(colorize("✅ No issues found!", ANSI.green));
     }
 
     return lines.join("\n");
