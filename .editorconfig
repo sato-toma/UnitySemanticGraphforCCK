@@ -1,0 +1,42 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+[*.{cs,csproj,props,targets,shader,asmdef,asmref}]
+indent_size = 4
+end_of_line = lf
+
+[*.{bat,cmd,ps1}]
+end_of_line = crlf
+
+[*.sh]
+end_of_line = lf
+
+[*.{ts,tsx,js,jsx,json}]
+indent_size = 2
+end_of_line = lf
+
+[*.{md,txt}]
+trim_trailing_whitespace = false
+
+[*.cs]
+# Unity/C# conventions
+charset = utf-8
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.shader]
+indent_size = 4
+
+[*.asmdef]
+indent_size = 2
+
+[*.meta]
+end_of_line = lf
