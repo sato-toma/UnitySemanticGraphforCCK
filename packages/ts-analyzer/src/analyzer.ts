@@ -114,7 +114,7 @@ export class ClusterScriptAnalyzer {
         column: invalidMutation.column,
         severity: "error",
         code: "INVALID_STATE_MUTATION",
-        message: `Directly mutating $.state.${invalidMutation.propertyName} with .push() does not update state. Use a temporary variable, modify it, and reassign it back to $.state.${invalidMutation.propertyName}.`,
+        message: `Directly mutating $.state.${invalidMutation.propertyName} with property assignment or array/object mutating methods does not update state. Use a temporary variable, modify it, and reassign it back to $.state.${invalidMutation.propertyName}.`,
         apiCall: `$.state.${invalidMutation.propertyName}.push`,
         requiredComponents: [],
         availableComponents: [],

@@ -30,4 +30,15 @@ describe("TypeScriptCodeParser", () => {
     expect(invalid).toHaveLength(1);
     expect(invalid[0]?.propertyName).toBe("items");
   });
+
+  it("detects nested property mutations on state objects", () => {
+    const content = `
+$.state.profile.name = "updated";
+$.state.items.push("item");
+`;
+    const invalid = TypeScriptCodeParser.extractInvalidStateMutationsFromString(content);
+
+    expect(invalid).toHaveLength(2);
+    expect(invalid.map((item) => item.propertyName)).toEqual(["profile", "items"]);
+  });
 });

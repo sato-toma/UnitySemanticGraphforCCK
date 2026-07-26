@@ -115,28 +115,28 @@ export class TypeScriptCodeParser {
       fullExpression: string;
     }> = [];
 
-    const directPushPattern =
-      /\$\s*\.\s*state\.\s*([A-Za-z_$][\w$]*)\s*\.push\s*\(/g;
-    const bracketPushPattern =
-      /\$\s*\.\s*state\s*\[\s*['"]([^'"]+)['"]\s*\]\s*\.push\s*\(/g;
+    const mutatingMethodPattern =
+      /\$\s*\.\s*state\s*(?:\.\s*([A-Za-z_$][\w$]*)|\[\s*['"]([^'"]+)['"]\s*\])(?:\s*(?:\.\s*[A-Za-z_$][\w$]*|\[\s*['"][^'"]+['"]\s*\]))*\s*\.(push|splice|pop|shift|unshift|sort|reverse)\s*\(/g;
+    const nestedAssignmentPattern =
+      /\$\s*\.\s*state\s*(?:\.\s*([A-Za-z_$][\w$]*)|\[\s*['"]([^'"]+)['"]\s*\])(?:\s*(?:\.\s*[A-Za-z_$][\w$]*|\[\s*['"][^'"]+['"]\s*\]))+\s*(?:[+\-*/%&|^]?=|--|\+\+)/g;
 
     lines.forEach((line: string, lineIndex: number) => {
       let match: RegExpExecArray | null;
 
-      while ((match = directPushPattern.exec(line)) !== null) {
+      while ((match = mutatingMethodPattern.exec(line)) !== null) {
         results.push({
           line: lineIndex + 1,
           column: match.index,
-          propertyName: match[1]!,
+          propertyName: match[1] ?? match[2] ?? "",
           fullExpression: match[0].trim(),
         });
       }
 
-      while ((match = bracketPushPattern.exec(line)) !== null) {
+      while ((match = nestedAssignmentPattern.exec(line)) !== null) {
         results.push({
           line: lineIndex + 1,
           column: match.index,
-          propertyName: match[1]!,
+          propertyName: match[1] ?? match[2] ?? "",
           fullExpression: match[0].trim(),
         });
       }
