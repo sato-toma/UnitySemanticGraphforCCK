@@ -294,7 +294,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ClusterVR.CreatorKit.Item.Implements::ClusterVR.CreatorKit.Item.Implements.Item
   id:
-    value: 0
+    value: 10286780051063531827
   itemName: 
   size: {x: 0, y: 0, z: 0}
 --- !u!114 &449583705
@@ -801,7 +801,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ClusterVR.CreatorKit.Item.Implements::ClusterVR.CreatorKit.Item.Implements.Item
   id:
-    value: 0
+    value: 13918320467282076102
   itemName: 
   size: {x: 0, y: 0, z: 0}
 --- !u!114 &948913350
