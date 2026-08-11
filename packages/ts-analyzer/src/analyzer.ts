@@ -1,4 +1,10 @@
-import { SceneGraph, AnalysisResult, ValidationIssue, GameObject } from "./types";
+import {
+  SceneGraph,
+  AnalysisResult,
+  ValidationIssue,
+  GameObject,
+} from "./types";
+import * as fs from "fs";
 import { SceneGraphParser } from "./sceneGraphParser";
 import { TypeScriptCodeParser } from "./typeScriptParser";
 import { ConstraintValidator } from "./constraintValidator";
@@ -28,12 +34,24 @@ function colorize(text: string, color: string): string {
  */
 export class ClusterScriptAnalyzer {
   private sceneGraph: SceneGraph;
+  private sceneGraphPath: string;
 
   constructor(sceneGraphPath: string) {
+    this.sceneGraphPath = sceneGraphPath;
     this.sceneGraph = SceneGraphParser.parseFile(sceneGraphPath);
   }
 
-  private getCandidateGameObjects(): GameObject[] {
+  private getCandidateGameObjects(tsFilePath: string = ""): GameObject[] {
+    const specificGameObject = SceneGraphParser.findGameObjectForSourceFile(
+      this.sceneGraphPath,
+      this.sceneGraph,
+      tsFilePath,
+    );
+
+    if (specificGameObject) {
+      return [specificGameObject];
+    }
+
     const scriptableObjects = SceneGraphParser.getGameObjectsWithScriptableItem(
       this.sceneGraph,
     );
@@ -43,8 +61,9 @@ export class ClusterScriptAnalyzer {
       : this.sceneGraph.gameObjects;
   }
 
-  analyzeTypeScriptFile(tsFilePath: string): AnalysisResult {
-    const apiCalls = TypeScriptCodeParser.extractApiCalls(tsFilePath);
+  analyzeTypeScriptFile(tsFilePath: string = ""): AnalysisResult {
+    const resolvedTsFilePath = this.resolveTypeScriptFile(tsFilePath);
+    const apiCalls = TypeScriptCodeParser.extractApiCalls(resolvedTsFilePath);
     const issues: ValidationIssue[] = [];
 
     // 各APIコールについてチェック
@@ -58,8 +77,10 @@ export class ClusterScriptAnalyzer {
         continue;
       }
 
-      const candidateGameObjects = this.getCandidateGameObjects();
-      const fallbackGameObject = candidateGameObjects[0] ?? this.sceneGraph.gameObjects[0];
+      const candidateGameObjects =
+        this.getCandidateGameObjects(resolvedTsFilePath);
+      const fallbackGameObject =
+        candidateGameObjects[0] ?? this.sceneGraph.gameObjects[0];
 
       if (!fallbackGameObject) {
         continue;
@@ -99,14 +120,13 @@ export class ClusterScriptAnalyzer {
           availableComponents: SceneGraphParser.getEnabledComponentsInHierarchy(
             this.sceneGraph,
             gameObject,
-          )
-            .map((c) => c.type),
+          ).map((c) => c.type),
         });
       }
     }
 
     const invalidStateMutations =
-      TypeScriptCodeParser.extractInvalidStateMutations(tsFilePath);
+      TypeScriptCodeParser.extractInvalidStateMutations(resolvedTsFilePath);
 
     for (const invalidMutation of invalidStateMutations) {
       issues.push({
@@ -122,7 +142,7 @@ export class ClusterScriptAnalyzer {
     }
 
     return {
-      filePath: tsFilePath,
+      filePath: resolvedTsFilePath,
       issues,
       summary: {
         totalIssues: issues.length,
@@ -130,6 +150,42 @@ export class ClusterScriptAnalyzer {
         warningCount: issues.filter((i) => i.severity === "warning").length,
       },
     };
+  }
+
+  private resolveTypeScriptFile(tsFilePath: string): string {
+    if (tsFilePath && fs.existsSync(tsFilePath)) {
+      return tsFilePath;
+    }
+
+    const scriptableSources = SceneGraphParser.getScriptableItemSourcePaths(
+      this.sceneGraphPath,
+      this.sceneGraph,
+    );
+
+    for (const scriptableSource of scriptableSources) {
+      if (fs.existsSync(scriptableSource)) {
+        return scriptableSource;
+      }
+    }
+
+    return tsFilePath;
+  }
+
+  getScriptableItemSourceFiles(): string[] {
+    return SceneGraphParser.getScriptableItemSourcePaths(
+      this.sceneGraphPath,
+      this.sceneGraph,
+    );
+  }
+
+  analyzeAllScriptableItemFiles(): Map<string, AnalysisResult> {
+    const results = new Map<string, AnalysisResult>();
+
+    for (const sourceFile of this.getScriptableItemSourceFiles()) {
+      results.set(sourceFile, this.analyzeTypeScriptFile(sourceFile));
+    }
+
+    return results;
   }
 
   /**

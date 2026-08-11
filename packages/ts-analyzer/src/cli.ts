@@ -6,6 +6,7 @@ import { ClusterScriptAnalyzer } from "./analyzer";
 import { SceneGraphParser } from "./sceneGraphParser";
 import { TypeScriptCodeParser } from "./typeScriptParser";
 import { ClusterScriptDefinitions } from "./clusterScriptDefinitions";
+import type { AnalysisResult } from "./types";
 
 /**
  * CLI ツール - ClusterScript静的解析
@@ -32,16 +33,16 @@ function printUsage() {
 Usage: ts-analyzer <command> [options]
 
 Commands:
-  analyze <sceneGraphPath> <tsFilePath>
-    Analyze TypeScript file against SceneGraph constraints
+  analyze <sceneGraphPath> [tsFilePath]
+    Analyze TypeScript file(s) against SceneGraph constraints
 
-  report <sceneGraphPath> <tsFilePath>
+  report <sceneGraphPath> [tsFilePath]
     Generate comprehensive analysis report
 
-  coverage <sceneGraphPath> <tsFilePath>
+  coverage <sceneGraphPath> [tsFilePath]
     Show API coverage report
 
-  recommend <sceneGraphPath> <tsFilePath>
+  recommend <sceneGraphPath> [tsFilePath]
     Show recommended components for TypeScript file
 
   scene-graph <sceneGraphPath>
@@ -51,66 +52,86 @@ Commands:
     List all available ClusterScript APIs
 
 Examples:
+  ts-analyzer analyze ./SceneGraph.toml
   ts-analyzer analyze ./SceneGraph.toml ./script.ts
-  ts-analyzer report ./SceneGraph.toml ./script.ts
-  ts-analyzer coverage ./SceneGraph.toml ./script.ts
+  ts-analyzer report ./SceneGraph.toml
   ts-analyzer scene-graph ./SceneGraph.toml
 `);
 }
 
 function analyzeCommand(args: string[]) {
-  if (args.length < 2) {
-    console.error("Error: Missing arguments");
+  if (args.length < 1) {
+    console.error("Error: Missing argument");
     printUsage();
     process.exit(1);
   }
 
   const sceneGraphPath = args[0];
   const tsFilePath = args[1];
-  // args length checked above; assert defined for TypeScript
   const sceneGraphPathNonNull = sceneGraphPath!;
-  const tsFilePathNonNull = tsFilePath!;
 
   if (!fs.existsSync(sceneGraphPathNonNull)) {
     console.error(`Error: SceneGraph file not found: ${sceneGraphPathNonNull}`);
     process.exit(1);
   }
 
-  if (!fs.existsSync(tsFilePathNonNull)) {
-    console.error(`Error: TypeScript file not found: ${tsFilePathNonNull}`);
-    process.exit(1);
-  }
-
   try {
     const analyzer = new ClusterScriptAnalyzer(sceneGraphPathNonNull);
-    const result = analyzer.analyzeTypeScriptFile(tsFilePathNonNull);
+    const targetFiles = tsFilePath
+      ? [tsFilePath]
+      : analyzer.getScriptableItemSourceFiles();
 
-    console.log(colorize(`\n=== Analysis Results ===\n`, ANSI.bold));
-    console.log(`File: ${tsFilePathNonNull}`);
-    console.log(`Issues: ${result.summary.totalIssues}`);
-    console.log(`${colorize("Errors", ANSI.red)}: ${result.summary.errorCount}`);
-    console.log(`${colorize("Warnings", ANSI.yellow)}: ${result.summary.warningCount}\n`);
+    if (targetFiles.length === 0) {
+      console.log(
+        colorize("No ScriptableItem source files found.", ANSI.yellow),
+      );
+      return;
+    }
 
-    if (result.issues.length > 0) {
-      console.log(colorize("Issues:", ANSI.bold));
-      for (const issue of result.issues) {
-        const severityColor =
-          issue.severity === "error" ? ANSI.red : ANSI.yellow;
-        const severityLabel = colorize(
-          `[${issue.severity.toUpperCase()}]`,
-          severityColor,
-        );
-
-        console.log(`  ${severityLabel} Line ${issue.line}:${issue.column}`);
-        console.log(`    ${colorize("API:", severityColor)} ${colorize(issue.apiCall, severityColor)}`);
-        console.log(`    ${colorize("Message:", severityColor)} ${colorize(issue.message, severityColor)}`);
-        console.log(`    ${colorize("Required:", severityColor)} ${colorize(issue.requiredComponents.join(", "), severityColor)}`);
-        console.log(
-          `    ${colorize("Available:", severityColor)} ${colorize(issue.availableComponents.join(", ") || "none", severityColor)}\n`,
-        );
+    for (const targetFile of targetFiles) {
+      if (!fs.existsSync(targetFile)) {
+        console.error(`Error: TypeScript file not found: ${targetFile}`);
+        continue;
       }
-    } else {
-      console.log(colorize("✅ No issues found!", ANSI.green));
+
+      const result = analyzer.analyzeTypeScriptFile(targetFile);
+      console.log(colorize(`\n=== Analysis Results ===\n`, ANSI.bold));
+      console.log(`File: ${targetFile}`);
+      console.log(`Issues: ${result.summary.totalIssues}`);
+      console.log(
+        `${colorize("Errors", ANSI.red)}: ${result.summary.errorCount}`,
+      );
+      console.log(
+        `${colorize("Warnings", ANSI.yellow)}: ${result.summary.warningCount}\n`,
+      );
+
+      if (result.issues.length > 0) {
+        console.log(colorize("Issues:", ANSI.bold));
+        for (const issue of result.issues) {
+          const severityColor =
+            issue.severity === "error" ? ANSI.red : ANSI.yellow;
+          const severityLabel = colorize(
+            `[${issue.severity.toUpperCase()}]`,
+            severityColor,
+          );
+
+          console.log(`  ${severityLabel} Line ${issue.line}:${issue.column}`);
+          console.log(
+            `    ${colorize("API:", severityColor)} ${colorize(issue.apiCall, severityColor)}`,
+          );
+          console.log(
+            `    ${colorize("Message:", severityColor)} ${colorize(issue.message, severityColor)}`,
+          );
+          console.log(
+            `    ${colorize("Required:", severityColor)} ${colorize(issue.requiredComponents.join(", "), severityColor)}`,
+          );
+          console.log(
+            `    ${colorize("Available:", severityColor)} ${colorize(issue.availableComponents.join(", ") || "none", severityColor)}\n`,
+          );
+        }
+      } else {
+        console.log(colorize("✅ No issues found!", ANSI.green));
+      }
     }
   } catch (error) {
     console.error("Error during analysis:", error);
@@ -119,36 +140,39 @@ function analyzeCommand(args: string[]) {
 }
 
 function reportCommand(args: string[]) {
-  if (args.length < 2) {
-    console.error("Error: Missing arguments");
+  if (args.length < 1) {
+    console.error("Error: Missing argument");
     printUsage();
     process.exit(1);
   }
 
   const sceneGraphPath = args[0];
   const tsFilePath = args[1];
-
-  // assert non-null after arg length check
   const sceneGraphPathNonNull = sceneGraphPath!;
-  const tsFilePathNonNull = tsFilePath!;
 
   if (!fs.existsSync(sceneGraphPathNonNull)) {
     console.error(`Error: SceneGraph file not found: ${sceneGraphPathNonNull}`);
     process.exit(1);
   }
 
-  if (!fs.existsSync(tsFilePathNonNull)) {
-    console.error(`Error: TypeScript file not found: ${tsFilePathNonNull}`);
-    process.exit(1);
-  }
-
   try {
     const analyzer = new ClusterScriptAnalyzer(sceneGraphPathNonNull);
+    const targetFiles = tsFilePath
+      ? [tsFilePath]
+      : analyzer.getScriptableItemSourceFiles();
 
     console.log(analyzer.generateSceneGraphReport());
     console.log("\n");
-    const result = analyzer.analyzeTypeScriptFile(tsFilePathNonNull);
-    const results = new Map().set(tsFilePathNonNull, result);
+
+    const results = new Map<string, AnalysisResult>();
+    for (const targetFile of targetFiles) {
+      if (!fs.existsSync(targetFile)) {
+        console.error(`Error: TypeScript file not found: ${targetFile}`);
+        continue;
+      }
+      results.set(targetFile, analyzer.analyzeTypeScriptFile(targetFile));
+    }
+
     console.log(analyzer.generateReport(results));
   } catch (error) {
     console.error("Error generating report:", error);
@@ -157,31 +181,34 @@ function reportCommand(args: string[]) {
 }
 
 function coverageCommand(args: string[]) {
-  if (args.length < 2) {
-    console.error("Error: Missing arguments");
+  if (args.length < 1) {
+    console.error("Error: Missing argument");
     printUsage();
     process.exit(1);
   }
 
   const sceneGraphPath = args[0];
   const tsFilePath = args[1];
-
   const sceneGraphPathNonNull = sceneGraphPath!;
-  const tsFilePathNonNull = tsFilePath!;
 
   if (!fs.existsSync(sceneGraphPathNonNull)) {
     console.error(`Error: SceneGraph file not found: ${sceneGraphPathNonNull}`);
     process.exit(1);
   }
 
-  if (!fs.existsSync(tsFilePathNonNull)) {
-    console.error(`Error: TypeScript file not found: ${tsFilePathNonNull}`);
-    process.exit(1);
-  }
-
   try {
     const analyzer = new ClusterScriptAnalyzer(sceneGraphPathNonNull);
-    console.log("\n" + analyzer.generateApiCoverageReport(tsFilePathNonNull));
+    const targetFiles = tsFilePath
+      ? [tsFilePath]
+      : analyzer.getScriptableItemSourceFiles();
+
+    for (const targetFile of targetFiles) {
+      if (!fs.existsSync(targetFile)) {
+        console.error(`Error: TypeScript file not found: ${targetFile}`);
+        continue;
+      }
+      console.log("\n" + analyzer.generateApiCoverageReport(targetFile));
+    }
   } catch (error) {
     console.error("Error generating coverage report:", error);
     process.exit(1);
@@ -189,33 +216,34 @@ function coverageCommand(args: string[]) {
 }
 
 function recommendCommand(args: string[]) {
-  if (args.length < 2) {
-    console.error("Error: Missing arguments");
+  if (args.length < 1) {
+    console.error("Error: Missing argument");
     printUsage();
     process.exit(1);
   }
 
   const sceneGraphPath = args[0];
   const tsFilePath = args[1];
-
   const sceneGraphPathNonNull = sceneGraphPath!;
-  const tsFilePathNonNull = tsFilePath!;
 
   if (!fs.existsSync(sceneGraphPathNonNull)) {
     console.error(`Error: SceneGraph file not found: ${sceneGraphPathNonNull}`);
     process.exit(1);
   }
 
-  if (!fs.existsSync(tsFilePathNonNull)) {
-    console.error(`Error: TypeScript file not found: ${tsFilePathNonNull}`);
-    process.exit(1);
-  }
-
   try {
     const analyzer = new ClusterScriptAnalyzer(sceneGraphPathNonNull);
-    console.log(
-      "\n" + analyzer.generateRecommendedComponents(tsFilePathNonNull),
-    );
+    const targetFiles = tsFilePath
+      ? [tsFilePath]
+      : analyzer.getScriptableItemSourceFiles();
+
+    for (const targetFile of targetFiles) {
+      if (!fs.existsSync(targetFile)) {
+        console.error(`Error: TypeScript file not found: ${targetFile}`);
+        continue;
+      }
+      console.log("\n" + analyzer.generateRecommendedComponents(targetFile));
+    }
   } catch (error) {
     console.error("Error generating recommendations:", error);
     process.exit(1);

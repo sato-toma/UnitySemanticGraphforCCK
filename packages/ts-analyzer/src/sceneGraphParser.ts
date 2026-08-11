@@ -1,5 +1,6 @@
 import { parse as parseToml } from "@iarna/toml";
 import * as fs from "fs";
+import * as path from "path";
 import { SceneGraph, GameObject, Component } from "./types";
 
 /**
@@ -104,7 +105,10 @@ export class SceneGraphParser {
     gameObject: GameObject,
   ): Component[] {
     const components = [...gameObject.components];
-    for (const ancestor of this.getGameObjectAncestors(sceneGraph, gameObject)) {
+    for (const ancestor of this.getGameObjectAncestors(
+      sceneGraph,
+      gameObject,
+    )) {
       components.push(...ancestor.components);
     }
     return components.filter((comp) => comp.enabled);
@@ -127,7 +131,9 @@ export class SceneGraphParser {
   /**
    * ScriptableItem の Source_Code_Asset を参照する GameObject を検索
    */
-  static getGameObjectsWithScriptableItem(sceneGraph: SceneGraph): GameObject[] {
+  static getGameObjectsWithScriptableItem(
+    sceneGraph: SceneGraph,
+  ): GameObject[] {
     return sceneGraph.gameObjects.filter((obj) =>
       obj.components.some(
         (comp) =>
@@ -135,6 +141,157 @@ export class SceneGraphParser {
           comp.enabled,
       ),
     );
+  }
+
+  /**
+   * 指定したソースファイルに対応する ScriptableItem GameObject を取得する。
+   */
+  static findGameObjectForSourceFile(
+    sceneGraphPath: string,
+    sceneGraph: SceneGraph,
+    sourceFilePath: string,
+  ): GameObject | null {
+    const normalizedTargetPath = path.resolve(sourceFilePath);
+
+    for (const gameObject of this.getGameObjectsWithScriptableItem(
+      sceneGraph,
+    )) {
+      const resolvedPath = this.resolveScriptableItemSourcePath(
+        sceneGraphPath,
+        gameObject,
+      );
+      if (!resolvedPath) {
+        continue;
+      }
+
+      const normalizedResolvedPath = path.resolve(resolvedPath);
+      if (normalizedResolvedPath === normalizedTargetPath) {
+        return gameObject;
+      }
+
+      const resolvedBaseName = path.basename(normalizedResolvedPath);
+      const targetBaseName = path.basename(normalizedTargetPath);
+      if (resolvedBaseName === targetBaseName) {
+        return gameObject;
+      }
+
+      const sourceCodeAsset = gameObject.components.find(
+        (comp) =>
+          comp.type === "ClusterVR.CreatorKit.Item.Implements.ScriptableItem" &&
+          comp.enabled,
+      )?.properties?.Source_Code_Asset;
+
+      if (
+        typeof sourceCodeAsset === "string" &&
+        sourceCodeAsset.length > 0 &&
+        path.basename(sourceCodeAsset, path.extname(sourceCodeAsset)) ===
+          path.basename(targetBaseName, path.extname(targetBaseName))
+      ) {
+        return gameObject;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * SceneGraph に紐づく ScriptableItem のソースファイル一覧を取得する。
+   */
+  static getScriptableItemSourcePaths(
+    sceneGraphPath: string,
+    sceneGraph: SceneGraph,
+  ): string[] {
+    const paths = new Set<string>();
+
+    for (const gameObject of sceneGraph.gameObjects) {
+      const resolvedPath = this.resolveScriptableItemSourcePath(
+        sceneGraphPath,
+        gameObject,
+      );
+      if (resolvedPath) {
+        paths.add(resolvedPath);
+      }
+    }
+
+    return Array.from(paths);
+  }
+
+  /**
+   * ScriptableItem コンポーネントの Source_Code_Asset を解決し、対応する TS ファイルのパスを返す。
+   * 参照先が SceneGraph と同じディレクトリにある場合はそのパスを返し、そうでなければ
+   * SceneGraph のディレクトリから相対解決する。
+   */
+  static resolveScriptableItemSourcePath(
+    sceneGraphPath: string,
+    gameObject: GameObject,
+  ): string | null {
+    const scriptableComponent = gameObject.components.find(
+      (comp) =>
+        comp.type === "ClusterVR.CreatorKit.Item.Implements.ScriptableItem" &&
+        comp.enabled,
+    );
+
+    if (!scriptableComponent) {
+      return null;
+    }
+
+    const sourceCodeAsset = scriptableComponent.properties?.Source_Code_Asset;
+    if (typeof sourceCodeAsset !== "string" || sourceCodeAsset.length === 0) {
+      return null;
+    }
+
+    const sceneGraphDir = path.dirname(sceneGraphPath);
+    const baseName = path.basename(
+      sourceCodeAsset,
+      path.extname(sourceCodeAsset),
+    );
+    const candidatePaths = [
+      path.resolve(sceneGraphDir, sourceCodeAsset),
+      path.resolve(sceneGraphDir, `${sourceCodeAsset}.ts`),
+      path.resolve(sceneGraphDir, `${sourceCodeAsset}.js`),
+      path.resolve(sceneGraphDir, sourceCodeAsset.replace(/\.ts$/, "")),
+      path.resolve(sceneGraphDir, `${baseName}.ts`),
+      path.resolve(sceneGraphDir, `${baseName}.js`),
+    ];
+
+    for (const candidatePath of candidatePaths) {
+      if (fs.existsSync(candidatePath)) {
+        return candidatePath;
+      }
+    }
+
+    const matchingFiles = this.findFilesByBasename(sceneGraphDir, baseName);
+    if (matchingFiles.length > 0) {
+      return matchingFiles[0] ?? null;
+    }
+
+    return null;
+  }
+
+  private static findFilesByBasename(
+    rootDir: string,
+    baseName: string,
+  ): string[] {
+    const results: string[] = [];
+
+    if (!fs.existsSync(rootDir)) {
+      return results;
+    }
+
+    const entries = fs.readdirSync(rootDir, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(rootDir, entry.name);
+      if (entry.isDirectory()) {
+        results.push(...this.findFilesByBasename(fullPath, baseName));
+      } else if (
+        entry.isFile() &&
+        (entry.name === `${baseName}.ts` || entry.name === `${baseName}.js`)
+      ) {
+        results.push(fullPath);
+      }
+    }
+
+    return results;
   }
 
   /**

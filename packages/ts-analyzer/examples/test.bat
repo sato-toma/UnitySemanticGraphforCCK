@@ -55,23 +55,23 @@ echo Build completed
 echo.
 
 REM テスト: 解析
-echo Test 1: Analyzing sample.ts...
-node ..\dist\cli.js analyze "%SCENE_GRAPH_PATH%" "%SAMPLE_TS_PATH%"
+echo Test 1: Analyzing scriptable item sources...
+node ..\dist\cli.js analyze "%SCENE_GRAPH_PATH%"
 echo.
 
 REM テスト: レポート
 echo Test 2: Generating report...
-node ..\dist\cli.js report "%SCENE_GRAPH_PATH%" "%SAMPLE_TS_PATH%"
+node ..\dist\cli.js report "%SCENE_GRAPH_PATH%"
 echo.
 
 REM テスト: API カバレッジ
 echo Test 3: API Coverage...
-node ..\dist\cli.js coverage "%SCENE_GRAPH_PATH%" "%SAMPLE_TS_PATH%"
+node ..\dist\cli.js coverage "%SCENE_GRAPH_PATH%"
 echo.
 
 REM テスト: 推奨コンポーネント
 echo Test 4: Recommended Components...
-node ..\dist\cli.js recommend "%SCENE_GRAPH_PATH%" "%SAMPLE_TS_PATH%"
+node ..\dist\cli.js recommend "%SCENE_GRAPH_PATH%"
 echo.
 
 REM テスト: シーングラフ表示
