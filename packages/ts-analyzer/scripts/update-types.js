@@ -3,7 +3,11 @@ const fs = require('fs');
 const path = require('path');
 
 const url = 'https://docs.cluster.mu/script/index.d.ts';
-const outDir = path.join(__dirname, '..', 'src', 'external');
+// Allow overriding the output directory via first CLI argument
+const outDirArg = process.argv[2];
+const outDir = outDirArg
+    ? path.resolve(outDirArg)
+    : path.join(__dirname, '..', 'src', 'external');
 const outFile = path.join(outDir, 'index.d.ts');
 
 if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
