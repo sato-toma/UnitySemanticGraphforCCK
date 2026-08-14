@@ -12,46 +12,6 @@ export const interactionMethodRules: ApiMethod[] = [
     description: "アイテムを掴む・手放すときに呼ばれるコールバック",
   },
   {
-    name: "onUse",
-    requiredComponents: [
-      {
-        componentType: "ClusterVR.CreatorKit.Item.Implements.GrabbableItem",
-        requirement: "required",
-      },
-    ],
-    description: "掴んでいるアイテムに使う動作をしたときのコールバック",
-  },
-  {
-    name: "onRide",
-    requiredComponents: [
-      {
-        componentType: "ClusterVR.CreatorKit.Item.RidableItem",
-        requirement: "required",
-      },
-    ],
-    description: "乗ることができるアイテムに乗る・降りるときのコールバック",
-  },
-  {
-    name: "onSteer",
-    requiredComponents: [
-      {
-        componentType: "ClusterVR.CreatorKit.Item.RidableItem",
-        requirement: "required",
-      },
-    ],
-    description: "乗ることができるアイテムに乗っているプレイヤーの移動入力",
-  },
-  {
-    name: "onInteract",
-    requiredComponents: [
-      {
-        componentType: "UnityEngine.Collider",
-        requirement: "required",
-      },
-    ],
-    description: "掴めないアイテムに使う動作をしたときのコールバック",
-  },
-  {
     name: "onCollide",
     requiredComponents: [
       {
@@ -67,17 +27,6 @@ export const interactionMethodRules: ApiMethod[] = [
 - それらのアイテムで衝突判定が必要な場合は、どちらかに IsTrigger なコライダーを設定して Trigger イベントを検知するか、設置されているコライダーに IsKinematic がオフで Constraints を全てオンにした Rigidbody を設定してください。
 
 参考: https://docs.cluster.mu/creatorkit/trigger-components/on-collide-item-trigger/`,
-  },
-  {
-    name: "getOverlaps",
-    requiredComponents: [
-      {
-        componentType:
-          "ClusterVR.CreatorKit.Item.Implements.OverlapDetectorShape",
-        requirement: "required",
-      },
-    ],
-    description: "OverlapDetectorShapeに重なっている物体を取得",
   },
 ];
 
