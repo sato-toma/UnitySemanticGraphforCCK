@@ -86,7 +86,11 @@ export class SceneGraphParser {
     let current = gameObject;
 
     while (current.parent) {
-      const parent = this.getGameObjectById(sceneGraph, current.parent);
+      // parent in SceneGraph may be an id or a name; try both
+      let parent = this.getGameObjectById(sceneGraph, current.parent);
+      if (!parent) {
+        parent = sceneGraph.gameObjects.find((obj) => obj.name === current.parent) || null;
+      }
       if (!parent) {
         break;
       }
@@ -105,13 +109,39 @@ export class SceneGraphParser {
     gameObject: GameObject,
   ): Component[] {
     const components = [...gameObject.components];
-    for (const ancestor of this.getGameObjectAncestors(
-      sceneGraph,
-      gameObject,
-    )) {
+
+    // include ancestor components
+    for (const ancestor of this.getGameObjectAncestors(sceneGraph, gameObject)) {
       components.push(...ancestor.components);
     }
+
+    // include descendant components (children and deeper)
+    for (const descendant of this.getGameObjectDescendants(sceneGraph, gameObject)) {
+      components.push(...descendant.components);
+    }
+
     return components.filter((comp) => comp.enabled);
+  }
+
+  /**
+   * 指定オブジェクトのすべての子孫 GameObject を再帰的に取得する
+   */
+  static getGameObjectDescendants(
+    sceneGraph: SceneGraph,
+    gameObject: GameObject,
+  ): GameObject[] {
+    const descendants: GameObject[] = [];
+
+    // parent can be stored as id or name in the TOML; match either
+    const children = sceneGraph.gameObjects.filter(
+      (o) => o.parent === gameObject.id || o.parent === gameObject.name,
+    );
+    for (const child of children) {
+      descendants.push(child);
+      descendants.push(...this.getGameObjectDescendants(sceneGraph, child));
+    }
+
+    return descendants;
   }
 
   /**

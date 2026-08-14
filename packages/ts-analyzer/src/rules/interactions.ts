@@ -28,6 +28,24 @@ export const interactionMethodRules: ApiMethod[] = [
 
 参考: https://docs.cluster.mu/creatorkit/trigger-components/on-collide-item-trigger/`,
   },
+  {
+    name: "getOverlaps",
+    requiredComponents: [
+      {
+        componentType:
+          "ClusterVR.CreatorKit.Item.Implements.OverlapDetectorShape",
+        requirement: "required",
+      },
+    ],
+    description: `OverlapDetectorShape に重なっているアイテムやプレイヤーを取得します。
+
+注意:
+- このコンポーネントが付与された Collider 自身は、別の Overlap Detector Shape によって検知されません。
+- 検知対象となるアイテムには Physical Shape または Overlap Source Shape が必要です。
+- Collider は物理的な衝突判定を行わなくなります（物理的な当たり判定とは別の用途です）。
+
+参考: https://docs.cluster.mu/creatorkit/world-components/shape-components/`,
+  },
 ];
 
 export const interactionRules = {

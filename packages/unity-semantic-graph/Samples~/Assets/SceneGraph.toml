@@ -25,6 +25,50 @@ type = "UnityEngine.BoxCollider"
 enabled = true
 
 [[gameObjects]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-568831066-0"
+path = "getOverlaps"
+name = "getOverlaps"
+parent = ""
+[[gameObjects.components]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-568831068-0"
+type = "ClusterVR.CreatorKit.Item.Implements.Item"
+enabled = true
+[gameObjects.components.properties]
+Item_Name = ""
+Size = [0, 0, 0]
+
+[[gameObjects.components]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-568831067-0"
+type = "ClusterVR.CreatorKit.Item.Implements.ScriptableItem"
+enabled = true
+[gameObjects.components.properties]
+Source_Code_Asset = "getOverlapsScript"
+Source_Code = ""
+
+
+[[gameObjects]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-1649809479-0"
+path = "getOverlaps/Cube"
+name = "Cube"
+parent = "getOverlaps"
+[[gameObjects.components]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-1649809483-0"
+type = "UnityEngine.MeshFilter"
+enabled = true
+[[gameObjects.components]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-1649809482-0"
+type = "UnityEngine.MeshRenderer"
+enabled = true
+[[gameObjects.components]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-1649809481-0"
+type = "UnityEngine.BoxCollider"
+enabled = true
+[[gameObjects.components]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-1649809484-0"
+type = "ClusterVR.CreatorKit.Item.Implements.OverlapDetectorShape"
+enabled = true
+
+[[gameObjects]]
 id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-965996138-0"
 path = "onCollide"
 name = "onCollide"
