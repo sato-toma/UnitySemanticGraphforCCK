@@ -23,7 +23,7 @@ $.onUpdate((deltaTime) => {
   $.setPosition(nextPosition);
 
   if (time >= period) {
-    $.log(`position y=${Number(nextPosition.y).toFixed(2)}`);
+    // $.log(`position y=${Number(nextPosition.y).toFixed(2)}`);
     $.state.time = 0;
   }
 });

@@ -17,7 +17,7 @@ $.onUpdate((deltaTime) => {
   $.setRotation(rotation);
 
   if (time >= 1) {
-    $.log(`rotation y=${angle.toFixed(2)}`);
+    // $.log(`rotation y=${angle.toFixed(2)}`);
     $.state.time = 0;
   }
 });
