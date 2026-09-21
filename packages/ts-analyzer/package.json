@@ -10,6 +10,7 @@
     "scripts": {
         "build": "tsc",
         "analyze": "node dist/cli.js",
+        "scenegraph:analyze": "node ./scripts/export-and-analyze.js",
         "dev": "tsc --watch",
         "test": "vitest run",
         "verify": "npm run build && npm run test",

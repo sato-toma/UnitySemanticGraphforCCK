@@ -63,6 +63,16 @@ Unity.exe -batchmode -quit `
 
 `-scenePath`はプロジェクト相対または絶対パス、`-outputPath`はプロジェクト相対または絶対パスを指定できます。引数を省略した場合は、アクティブシーンとプロジェクト直下の`SceneGraph.toml`を使用します。batchmodeで失敗した場合は終了コード1です。
 
+### Export and Analyze 一括実行
+
+リポジトリルートのNode.jsスクリプトが、Unity exportとTypeScript analyzerを連続して実行します。
+
+- Windows: `scripts/export-and-analyze.ps1`
+- Linux/macOS: `scripts/export-and-analyze.sh`
+- npm: `cd packages/ts-analyzer && npm run scenegraph:analyze -- ...`
+
+共通オプションは`--project-path`、`--scene-path`、`--script-path`、`--output-path`、`--unity-path`です。`--fail-on-issues`を付けると、解析結果に問題がある場合に終了コード1を返します。Unityの場所は`UNITY_PATH`環境変数でも指定できます。
+
 ## 変更の境界
 
 - API ルールだけの変更は `packages/ts-analyzer/src/rules/` とテストを中心に変更する。

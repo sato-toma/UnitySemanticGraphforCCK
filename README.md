@@ -34,6 +34,39 @@ Unity.exe -batchmode -quit `
 
 `-scenePath`を省略すると現在のアクティブシーンを使い、`-outputPath`を省略するとUnityプロジェクト直下の`SceneGraph.toml`へ出力します。出力に失敗した場合、batchmodeは終了コード1になります。
 
+## Export and Analyze
+
+UnityのTOML出力とClusterScript解析を一度に実行できます。Node.jsを共通実装として使用するため、Windows、Linux、macOSで同じ引数を使えます。WindowsではPowerShell、Linux/macOSではシェルスクリプトも利用できます。
+
+```powershell
+./scripts/export-and-analyze.ps1 `
+	--unity-path "C:\Program Files\Unity\Hub\Editor\6000.2.6f2\Editor\Unity.exe" `
+	--project-path "C:\path\to\UnityProject" `
+	--scene-path "Assets/Scenes/Main.unity" `
+	--script-path "C:\path\to\script.ts" `
+	--fail-on-issues
+```
+
+```bash
+./scripts/export-and-analyze.sh \
+	--project-path /path/to/UnityProject \
+	--scene-path Assets/Scenes/Main.unity \
+	--script-path /path/to/script.ts \
+	--fail-on-issues
+```
+
+同じ処理は`packages/ts-analyzer`からnpm commandでも実行できます。
+
+```bash
+cd packages/ts-analyzer
+npm run scenegraph:analyze -- \
+	--project-path ../unity-semantic-graph/Samples~ \
+	--scene-path Assets/test.unity \
+	--script-path ../unity-semantic-graph/Samples~/Assets/Script/src/onGrabScript.ts
+```
+
+Unity Editorの場所は`--unity-path`または`UNITY_PATH`環境変数で指定できます。iOS向けの場合も、iOS端末上ではなくmacOS上のUnity Editorからこのスクリプトを実行します。
+
 ```bash
 cd packages/ts-analyzer
 npm install

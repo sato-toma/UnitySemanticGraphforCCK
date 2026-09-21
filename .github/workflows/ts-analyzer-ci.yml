@@ -4,9 +4,13 @@ on:
   push:
     paths:
       - 'packages/ts-analyzer/**'
+      - 'scripts/**'
+      - '.github/workflows/ts-analyzer-ci.yml'
   pull_request:
     paths:
       - 'packages/ts-analyzer/**'
+      - 'scripts/**'
+      - '.github/workflows/ts-analyzer-ci.yml'
   workflow_dispatch:
 
 jobs:
@@ -14,10 +18,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - name: Setup Node
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: '24'
           cache: 'npm'
@@ -34,3 +38,51 @@ jobs:
       - name: Run tests
         working-directory: packages/ts-analyzer
         run: npm run test
+
+      - name: Test shell export wrapper
+        run: |
+          chmod +x scripts/ci/fake-unity.sh
+          chmod +x scripts/export-and-analyze.sh
+          mkdir -p "$RUNNER_TEMP/scenegraph-fixture"
+          ./scripts/export-and-analyze.sh \
+            --unity-path "$GITHUB_WORKSPACE/scripts/ci/fake-unity.sh" \
+            --project-path "$RUNNER_TEMP/scenegraph-fixture" \
+            --script-path "$GITHUB_WORKSPACE/packages/unity-semantic-graph/Samples~/Assets/Script/src/onGrabScript.ts" \
+            --output-path SceneGraph.generated.toml \
+            --log-path scenegraph-export.log \
+            --fail-on-issues
+
+  powershell-wrapper:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: packages/ts-analyzer/package-lock.json
+
+      - name: Install dependencies
+        working-directory: packages/ts-analyzer
+        run: npm ci
+
+      - name: Build package
+        working-directory: packages/ts-analyzer
+        run: npm run build
+
+      - name: Test PowerShell export wrapper
+        shell: pwsh
+        env:
+          PROJECT_PATH: ${{ runner.temp }}\scenegraph-fixture
+        run: |
+          New-Item -ItemType Directory -Force -Path $env:PROJECT_PATH | Out-Null
+          .\scripts\export-and-analyze.ps1 `
+            --unity-path "$env:GITHUB_WORKSPACE\scripts\ci\fake-unity.ps1" `
+            --project-path $env:PROJECT_PATH `
+            --script-path "$env:GITHUB_WORKSPACE\packages\unity-semantic-graph\Samples~\Assets\Script\src\onGrabScript.ts" `
+            --output-path SceneGraph.generated.toml `
+            --log-path scenegraph-export.log `
+            --fail-on-issues
