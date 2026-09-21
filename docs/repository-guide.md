@@ -1,0 +1,57 @@
+# リポジトリ案内
+
+## 目的
+
+このリポジトリは、Cluster Creator Kit を使う Unity プロジェクトからシーン構造を `SceneGraph.toml` として出力し、ClusterScript の TypeScript コードが必要とする Unity コンポーネントを静的解析するための基盤です。
+
+判定は現在、次の情報を文字列として照合します。
+
+- TypeScript から検出した ClusterScript API
+- API に定義された必要コンポーネント
+- TOML に記録された GameObject とコンポーネント
+- 必要に応じた親 GameObject のコンポーネント
+
+## 構成
+
+- `packages/ts-analyzer/`
+  - TypeScript 製の解析ライブラリと CLI
+  - `src/analyzer.ts`: TOML と TypeScript を結び付ける統合解析
+  - `src/sceneGraphParser.ts`: `SceneGraph.toml` の読み込みと検索
+  - `src/typeScriptParser.ts`: ClusterScript API の検出
+  - `src/constraintValidator.ts`: コンポーネント制約の判定
+  - `src/clusterScriptDefinitions.ts`: API と制約の公開定義
+  - `src/rules/`: 物理、インタラクション、移動、state変更のルール
+  - `src/*.test.ts`: Vitest による単体テスト
+  - `examples/`: CLI の実行例
+  - `IMPLEMENTATION.md`: 現在の実装ガイド
+- `packages/unity-semantic-graph/`
+  - Unity Package と Editor 拡張
+  - `Editor/Exporter/SelectiveComponentTomlExporter.cs`: シーンから TOML を出力
+  - `Runtime/`: Runtime assembly 定義
+  - `Samples~/`: 実際に開けるサンプル Unity プロジェクト
+  - `Tests/`: Unity Test Framework 用パッケージ定義
+- `.github/workflows/`
+  - 現在は TypeScript analyzer の build/test を実行
+- `docs/`
+  - 設計、データ契約、ADR、開発計画
+- `.github/copilot-instructions.md`
+  - このリポジトリで Agent が守る作業規約
+- `.github/skills/`
+  - Unity 出力、TOML スキーマ、TypeScript 解析をまたぐ作業手順
+
+## 開発時の基本フロー
+
+1. Unity の対象シーンを開く。
+2. `SemanticGraph/Export All Component Graph to TOML` で全体を出力する。
+3. 必要なら `SemanticGraph/Update Selected Component Graph to TOML` で選択範囲を更新する。
+4. TypeScript analyzer で `SceneGraph.toml` と ClusterScript を解析する。
+5. 解析結果に合わせて Unity コンポーネントまたは ClusterScript を修正する。
+6. `packages/ts-analyzer` で `npm run verify` を実行する。
+7. TOML の形式や解釈を変更した場合は、schema のサンプルとテストを同じ変更で更新する。
+
+## 変更の境界
+
+- API ルールだけの変更は `packages/ts-analyzer/src/rules/` とテストを中心に変更する。
+- TOML の項目や型を変更する場合は、Unity exporter、parser、型、サンプル、文書を同時に確認する。
+- Unity exporter の変更は、最低限サンプル出力を目視確認し、将来は Unity Edit Mode テストで固定する。
+- 解析結果の終了コードを変更する場合は、CLI と CI の利用方法を同時に更新する。
