@@ -1,0 +1,63 @@
+# Normalize text files to LF in the repository.
+* text=auto eol=lf
+
+# Windows command and PowerShell scripts use CRLF when checked out.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Unity YAML assets are text and should remain diffable.
+*.anim text eol=lf
+*.asset text eol=lf
+*.controller text eol=lf
+*.mat text eol=lf
+*.meta text eol=lf
+*.overrideController text eol=lf
+*.physicMaterial text eol=lf
+*.playable text eol=lf
+*.prefab text eol=lf
+*.unity text eol=lf
+
+# Common Unity and source text formats.
+*.asmdef text eol=lf
+*.asmref text eol=lf
+*.cginc text eol=lf
+*.cs text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.shader text eol=lf
+*.sh text eol=lf
+*.toml text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Binary assets must not be normalized or diffed as text.
+*.7z binary
+*.dll binary
+*.fbx binary
+*.gif binary
+*.ico binary
+*.jpg binary
+*.jpeg binary
+*.mp3 binary
+*.mp4 binary
+*.ogg binary
+*.otf binary
+*.png binary
+*.psd binary
+*.so binary
+*.tga binary
+*.ttf binary
+*.wav binary
+*.webp binary
+*.zip binary
+
+# This Unity terrain asset is serialized as binary rather than YAML.
+packages/unity-semantic-graph/Samples~/Assets/ClusterCreatorKitTemplate/Fishing/Terrain/SampleTerrain.asset binary
+
+# Keep repository metadata in LF format.
+.editorconfig text eol=lf
+.gitattributes text eol=lf
+.gitignore text eol=lf
