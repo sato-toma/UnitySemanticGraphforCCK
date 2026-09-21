@@ -408,6 +408,8 @@ MonoBehaviour:
     value: 10286780051063531827
   itemName: 
   size: {x: 0, y: 0, z: 0}
+  itemTags: []
+  movementType: 0
 --- !u!114 &449583705
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -641,6 +643,8 @@ MonoBehaviour:
     value: 17941040075572499155
   itemName: 
   size: {x: 0, y: 0, z: 0}
+  itemTags: []
+  movementType: 0
 --- !u!4 &568831069
 Transform:
   m_ObjectHideFlags: 0
@@ -980,6 +984,8 @@ MonoBehaviour:
     value: 13918320467282076102
   itemName: 
   size: {x: 0, y: 0, z: 0}
+  itemTags: []
+  movementType: 0
 --- !u!114 &948913350
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1071,6 +1077,8 @@ MonoBehaviour:
     value: 14556615328405504541
   itemName: 
   size: {x: 0, y: 0, z: 0}
+  itemTags: []
+  movementType: 0
 --- !u!4 &965996141
 Transform:
   m_ObjectHideFlags: 0
@@ -1318,6 +1326,8 @@ MonoBehaviour:
     value: 13355157953686281285
   itemName: 
   size: {x: 0, y: 0, z: 0}
+  itemTags: []
+  movementType: 0
 --- !u!4 &1369298481
 Transform:
   m_ObjectHideFlags: 0

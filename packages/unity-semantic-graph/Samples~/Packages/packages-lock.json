@@ -218,12 +218,12 @@
       }
     },
     "mu.cluster.cluster-creator-kit": {
-      "version": "3.3.0",
+      "version": "3.4.0",
       "depth": 0,
       "source": "registry",
       "dependencies": {
-        "com.unity.nuget.newtonsoft-json": "3.0.2",
-        "com.unity.inputsystem": "1.11.0"
+        "com.unity.inputsystem": "1.11.0",
+        "com.unity.nuget.newtonsoft-json": "3.0.2"
       },
       "url": "https://registry.npmjs.com"
     },
