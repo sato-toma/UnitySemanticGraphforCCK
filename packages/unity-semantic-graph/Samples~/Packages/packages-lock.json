@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "com.azuki.unity-semantic-graph": {
-      "version": "https://github.com/sato-toma/UnitySemanticGraphforCCK.git?path=packages/unity-semantic-graph",
+      "version": "https://github.com/sato-toma/cck-scenegraph-tools.git?path=packages/unity-semantic-graph",
       "depth": 0,
       "source": "git",
       "dependencies": {},

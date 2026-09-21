@@ -1,4 +1,4 @@
-# UnitySemanticGraphforCCK
+# cck-scenegraph-tools
 
 Cluster Creator Kit の Unity シーンを `SceneGraph.toml` に出力し、ClusterScript の TypeScript コードが必要とする Unity コンポーネントを静的解析するプロジェクトです。
 
