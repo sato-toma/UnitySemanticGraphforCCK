@@ -42,6 +42,7 @@ jobs:
       - name: Test shell export wrapper
         run: |
           chmod +x scripts/ci/fake-unity.sh
+          chmod +x scripts/export-and-analyze.sh
           mkdir -p "$RUNNER_TEMP/scenegraph-fixture"
           ./scripts/export-and-analyze.sh \
             --unity-path "$GITHUB_WORKSPACE/scripts/ci/fake-unity.sh" \
