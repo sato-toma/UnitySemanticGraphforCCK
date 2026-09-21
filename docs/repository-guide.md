@@ -49,6 +49,20 @@
 6. `packages/ts-analyzer` で `npm run verify` を実行する。
 7. TOML の形式や解釈を変更した場合は、schema のサンプルとテストを同じ変更で更新する。
 
+### Unity CLIでの全体出力
+
+CIやスクリプトからはUnity Editorのbatchmodeを使用します。
+
+```powershell
+Unity.exe -batchmode -quit `
+  -projectPath "C:\path\to\UnityProject" `
+  -executeMethod UnitySemanticGraph.Editor.Exporter.SelectiveComponentTomlExporter.ExportGraphToToml `
+  -scenePath "Assets/Scenes/Main.unity" `
+  -outputPath "SceneGraph.toml"
+```
+
+`-scenePath`はプロジェクト相対または絶対パス、`-outputPath`はプロジェクト相対または絶対パスを指定できます。引数を省略した場合は、アクティブシーンとプロジェクト直下の`SceneGraph.toml`を使用します。batchmodeで失敗した場合は終了コード1です。
+
 ## 変更の境界
 
 - API ルールだけの変更は `packages/ts-analyzer/src/rules/` とテストを中心に変更する。

@@ -25,6 +25,7 @@
 
 ## Phase 3: 人間の作業を短くする
 
+- [x] Unity CLI の `-executeMethod` から SceneGraph.toml を全体出力する。
 - [ ] Unity メニューに「export and analyze」を追加するか、CLI bridge を用意する。
 - [ ] `analyze --watch` または Unity 保存後の再解析手順を整える。
 - [ ] JSON/SARIF レポートを追加し、GitHub Actions の annotation に接続する。

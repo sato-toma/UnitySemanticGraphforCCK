@@ -19,6 +19,21 @@ Cluster Creator Kit の Unity シーンを `SceneGraph.toml` に出力し、Clus
 3. API が要求するコンポーネントとシーン上のコンポーネントを照合する。
 4. 不足コンポーネント、無効な設定、state の直接変更を修正する。
 
+## Unity CLIからのTOML出力
+
+Unity Editorを起動せずに、batchmodeの`-executeMethod`からアクティブシーンを出力できます。
+
+```powershell
+Unity.exe -batchmode -quit `
+	-projectPath "C:\path\to\UnityProject" `
+	-executeMethod UnitySemanticGraph.Editor.Exporter.SelectiveComponentTomlExporter.ExportGraphToToml `
+	-scenePath "Assets/Scenes/Main.unity" `
+	-outputPath "SceneGraph.toml" `
+	-logFile "Logs/scenegraph-export.log"
+```
+
+`-scenePath`を省略すると現在のアクティブシーンを使い、`-outputPath`を省略するとUnityプロジェクト直下の`SceneGraph.toml`へ出力します。出力に失敗した場合、batchmodeは終了コード1になります。
+
 ```bash
 cd packages/ts-analyzer
 npm install

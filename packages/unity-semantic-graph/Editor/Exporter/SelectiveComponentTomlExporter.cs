@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -12,25 +13,65 @@ namespace UnitySemanticGraph.Editor.Exporter
 {
     public static class SelectiveComponentTomlExporter
     {
+        public static void ExportGraphToToml()
+        {
+            try
+            {
+                var args = Environment.GetCommandLineArgs();
+                var scenePath = GetCommandLineArgument(args, "-scenePath");
+                var outputPath = GetCommandLineArgument(args, "-outputPath");
+
+                if (!string.IsNullOrEmpty(scenePath))
+                {
+                    var projectRoot = Directory.GetParent(Application.dataPath).FullName;
+                    var resolvedScenePath = Path.IsPathRooted(scenePath)
+                        ? scenePath
+                        : Path.Combine(projectRoot, scenePath);
+                    var scene = EditorSceneManager.OpenScene(resolvedScenePath, OpenSceneMode.Single);
+                    if (!scene.IsValid() || !scene.isLoaded)
+                    {
+                        throw new InvalidOperationException($"Failed to open scene: {resolvedScenePath}");
+                    }
+                }
+
+                var activeScene = SceneManager.GetActiveScene();
+                if (!activeScene.IsValid() || string.IsNullOrEmpty(activeScene.path))
+                {
+                    throw new InvalidOperationException("No valid scene is open. Pass -scenePath Assets/Scenes/Example.unity.");
+                }
+
+                var resolvedOutputPath = ResolveOutputPath(outputPath);
+                var processed = CollectSceneGameObjects(activeScene);
+                Directory.CreateDirectory(Path.GetDirectoryName(resolvedOutputPath));
+                WriteSceneToml(resolvedOutputPath, processed.Values);
+                Debug.Log($"SceneGraph TOML exported: {resolvedOutputPath}");
+
+                if (Application.isBatchMode)
+                {
+                    EditorApplication.Exit(0);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"SceneGraph TOML export failed: {ex}");
+                if (Application.isBatchMode)
+                {
+                    EditorApplication.Exit(1);
+                }
+            }
+        }
+
         [MenuItem("SemanticGraph/Export All Component Graph to TOML")]
         private static void ExportAllGraph()
         {
             var scene = SceneManager.GetActiveScene();
-            var processed = new Dictionary<PersistentId, GameObjectInfo>();
-            foreach (var root in scene.GetRootGameObjects())
-            {
-                AddWithParents(root, processed);
-                AddRelevantDescendants(root, processed);
-            }
-
-            var sorted = processed.Values.OrderBy(g => g.Path).ToList();
-            var defaultPath = Path.Combine(Application.dataPath, "../SceneGraph.toml");
+            var processed = CollectSceneGameObjects(scene);
             var savePath = EditorUtility.SaveFilePanel("Export TOML", Application.dataPath, "SceneGraph.toml", "toml");
             if (string.IsNullOrEmpty(savePath)) return;
 
             try
             {
-                WriteToml(savePath, sorted);
+                WriteSceneToml(savePath, processed.Values);
                 AssetDatabase.Refresh();
                 EditorUtility.DisplayDialog("Export Completed", $"TOML ファイルを出力しました:\n{savePath}", "OK");
             }
@@ -88,10 +129,9 @@ namespace UnitySemanticGraph.Editor.Exporter
                 AddRelevantDescendants(gameObject, processed);
             }
 
-            var sorted = processed.Values.OrderBy(g => g.Path).ToList();
             try
             {
-                WriteToml(savePath, sorted);
+                WriteSceneToml(savePath, processed.Values);
                 AssetDatabase.Refresh();
                 EditorUtility.DisplayDialog("Export Completed", $"TOML ファイルを出力しました:\n{savePath}", "OK");
             }
@@ -158,6 +198,43 @@ namespace UnitySemanticGraph.Editor.Exporter
             }
 
             return false;
+        }
+
+        private static Dictionary<PersistentId, GameObjectInfo> CollectSceneGameObjects(Scene scene)
+        {
+            var processed = new Dictionary<PersistentId, GameObjectInfo>();
+            foreach (var root in scene.GetRootGameObjects())
+            {
+                AddWithParents(root, processed);
+                AddRelevantDescendants(root, processed);
+            }
+
+            return processed;
+        }
+
+        private static string GetCommandLineArgument(string[] args, string name)
+        {
+            for (var index = 0; index < args.Length - 1; index++)
+            {
+                if (args[index] == name)
+                {
+                    return args[index + 1];
+                }
+            }
+
+            return null;
+        }
+
+        private static string ResolveOutputPath(string outputPath)
+        {
+            var projectRoot = Directory.GetParent(Application.dataPath).FullName;
+            var path = string.IsNullOrEmpty(outputPath) ? "SceneGraph.toml" : outputPath;
+            return Path.GetFullPath(Path.IsPathRooted(path) ? path : Path.Combine(projectRoot, path));
+        }
+
+        private static void WriteSceneToml(string filePath, IEnumerable<GameObjectInfo> gameObjects)
+        {
+            WriteToml(filePath, gameObjects.OrderBy(g => g.Path).ToList());
         }
 
         private static IReadOnlyList<ComponentInfo> GatherComponents(GameObject go)
