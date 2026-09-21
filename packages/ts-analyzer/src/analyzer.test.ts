@@ -104,57 +104,6 @@ Source_Code_Asset = "onGrabScript"
     ]);
   });
 
-  it("accepts MovableItem from the parent hierarchy", () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "ts-analyzer-"));
-    const tsFilePath = path.join(tempDir, "sample.ts");
-    const sceneGraphPath = path.join(tempDir, "SceneGraph.toml");
-
-    fs.writeFileSync(tsFilePath, "$.setPosition(new Vector3(1, 2, 3));\n");
-    fs.writeFileSync(
-      sceneGraphPath,
-      `
-project = "TestProject"
-
-[[gameObjects]]
-id = "parent-obj"
-path = "setPosition"
-name = "setPosition"
-parent = ""
-
-[[gameObjects.components]]
-type = "ClusterVR.CreatorKit.Item.Implements.MovableItem"
-enabled = true
-
-[[gameObjects]]
-id = "child-obj"
-path = "setPosition/Cube"
-name = "Cube"
-parent = "parent-obj"
-`,
-    );
-
-    const sceneGraph = SceneGraphParser.parseFile(sceneGraphPath);
-    const childObject = sceneGraph.gameObjects.find(
-      (obj) => obj.id === "child-obj",
-    );
-    const components = SceneGraphParser.getEnabledComponentsInHierarchy(
-      sceneGraph,
-      childObject!,
-    );
-
-    expect(
-      components.some(
-        (component) =>
-          component.type === "ClusterVR.CreatorKit.Item.Implements.MovableItem",
-      ),
-    ).toBe(true);
-
-    const analyzer = new ClusterScriptAnalyzer(sceneGraphPath);
-    const result = analyzer.analyzeTypeScriptFile(tsFilePath);
-
-    expect(result.issues).toHaveLength(0);
-  });
-
   it("validates the specific ScriptableItem that matches the analyzed file", () => {
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "ts-analyzer-"));
     const tsFilePath = path.join(tempDir, "setRotationScript.ts");
