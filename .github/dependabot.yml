@@ -12,6 +12,17 @@ updates:
       - "dependabot"
     assignees:
       - sato-toma
+  - package-ecosystem: "npm"
+    directory: "/presentations"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    cooldown:
+      default-days: 5
+    labels:
+      - "dependabot"
+    assignees:
+      - sato-toma
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
