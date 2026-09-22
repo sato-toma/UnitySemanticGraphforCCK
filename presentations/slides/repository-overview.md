@@ -3,7 +3,7 @@ marp: true
 theme: default
 paginate: true
 size: 16:9
-title: Unity Semantic Graph for CCK
+title: cck-scenegraph-tools
 description: Cluster Creator Kit 向け SceneGraph と ClusterScript 静的解析の概要
 style: |
   section {
@@ -17,7 +17,7 @@ style: |
   code { color: #0b5269; }
 ---
 
-# Unity Semantic Graph for CCK
+# cck-scenegraph-tools
 
 ### Unity シーン設定と ClusterScript の整合性を、実行前に検査する
 
