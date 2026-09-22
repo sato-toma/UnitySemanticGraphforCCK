@@ -1,0 +1,5 @@
+node_modules/
+assets/generated/*
+!assets/generated/.gitkeep
+dist/*
+!dist/.gitkeep

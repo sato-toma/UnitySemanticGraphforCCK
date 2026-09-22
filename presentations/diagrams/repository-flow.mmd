@@ -1,0 +1,8 @@
+flowchart LR
+  unity[Unity Scene] --> exporter[Unity Exporter]
+  exporter --> toml[SceneGraph.toml]
+  script[ClusterScript TypeScript] --> parser[TypeScript Parser]
+  toml --> validator[Constraint Validator]
+  parser --> validator
+  rules[API Component Rules] --> validator
+  validator --> report[CLI Report / CI]
