@@ -31,7 +31,7 @@ ClusterScript API の解析ルールは、Unity 上でコンポーネント構�
 
 | 状態 | API | Unity で確認すること | 想定する制約 |
 | --- | --- | --- | --- |
-| [ ] | `onInteract` | Collider の種類、無効化時、親階層の扱い | Collider 1 個以上。要確認 |
+| [ ] | `onInteract` | 無効化時、親階層の扱い（Unity 未確認） | `UnityEngine.BoxCollider` / `SphereCollider` / `CapsuleCollider` / `MeshCollider` / `WheelCollider` のいずれか1個以上 |
 | [ ] | `onUse` | GrabbableItem の有無、UseItemTrigger との優先関係 | `GrabbableItem`。要確認 |
 | [ ] | `onRide` | 乗車可能設定、RidableItem の有無 | `RidableItem`。要確認 |
 | [ ] | `getGrabbingPlayer` | Grab 中と非 Grab 中の戻り値 | `GrabbableItem`。要確認 |

@@ -107,7 +107,7 @@ export class ClusterScriptAnalyzer {
       if (!validation.isValid) {
         const requiredComponents = constraints
           .filter((c) => c.requirement === "required")
-          .map((c) => c.componentType);
+          .map((c) => ConstraintValidator.formatComponentType(c.componentType));
 
         issues.push({
           line: call.line,
@@ -338,7 +338,9 @@ export class ClusterScriptAnalyzer {
 
       for (const constraint of constraints) {
         if (constraint.requirement === "required") {
-          requiredComponents.add(constraint.componentType);
+          requiredComponents.add(
+            ConstraintValidator.formatComponentType(constraint.componentType),
+          );
         }
       }
     }

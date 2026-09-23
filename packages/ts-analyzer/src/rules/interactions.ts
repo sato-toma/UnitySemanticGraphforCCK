@@ -2,6 +2,24 @@ import { ApiMethod } from "../types";
 
 export const interactionMethodRules: ApiMethod[] = [
   {
+    name: "onInteract",
+    requiredComponents: [
+      {
+        // Unity の Collider を継承する具象型のいずれか1つ以上が必要 (抽象型は SceneGraph.toml に出力されない)
+        componentType: [
+          "UnityEngine.BoxCollider",
+          "UnityEngine.SphereCollider",
+          "UnityEngine.CapsuleCollider",
+          "UnityEngine.MeshCollider",
+          "UnityEngine.WheelCollider",
+        ],
+        requirement: "required",
+      },
+    ],
+    description:
+      "掴めないアイテムに「使う」動作をした際に呼ばれるコールバック。アイテムには1つ以上のColliderコンポーネントが必要",
+  },
+  {
     name: "onGrab",
     requiredComponents: [
       {

@@ -1,4 +1,9 @@
-import { Component, ComponentConstraint, GameObject, SceneGraph } from "./types";
+import {
+  Component,
+  ComponentConstraint,
+  GameObject,
+  SceneGraph,
+} from "./types";
 import { ClusterScriptDefinitions } from "./clusterScriptDefinitions";
 import { SceneGraphParser } from "./sceneGraphParser";
 
@@ -6,6 +11,21 @@ import { SceneGraphParser } from "./sceneGraphParser";
  * コンポーネント制約の検証エンジン
  */
 export class ConstraintValidator {
+  /**
+   * componentType を常に配列として扱うための正規化
+   */
+  static normalizeComponentTypes(componentType: string | string[]): string[] {
+    return Array.isArray(componentType) ? componentType : [componentType];
+  }
+
+  /**
+   * 表示用にcomponentTypeを1つの文字列へ整形する (anyOfの場合は " | " で連結)
+   */
+  static formatComponentType(componentType: string | string[]): string {
+    return ConstraintValidator.normalizeComponentTypes(componentType).join(
+      " | ",
+    );
+  }
   /**
    * GameObjectが指定されたコンポーネント制約を満たしているかチェック
    */
@@ -30,24 +50,32 @@ export class ConstraintValidator {
     const extraForbidden: string[] = [];
 
     for (const constraint of constraints) {
+      const acceptedTypes = ConstraintValidator.normalizeComponentTypes(
+        constraint.componentType,
+      );
+
       switch (constraint.requirement) {
         case "required":
           if (
-            !Array.from(availableComponents).some(
-              (componentType) => componentType === constraint.componentType,
+            !acceptedTypes.some((componentType) =>
+              availableComponents.has(componentType),
             )
           ) {
-            missingRequired.push(constraint.componentType);
+            missingRequired.push(
+              ConstraintValidator.formatComponentType(constraint.componentType),
+            );
           }
           break;
 
         case "forbidden":
           if (
-            Array.from(availableComponents).some(
-              (componentType) => componentType === constraint.componentType,
+            acceptedTypes.some((componentType) =>
+              availableComponents.has(componentType),
             )
           ) {
-            extraForbidden.push(constraint.componentType);
+            extraForbidden.push(
+              ConstraintValidator.formatComponentType(constraint.componentType),
+            );
           }
           break;
 
@@ -97,7 +125,10 @@ export class ConstraintValidator {
 
     const enabledComponents = new Set(
       (sceneGraph
-        ? SceneGraphParser.getEnabledComponentsInHierarchy(sceneGraph, gameObject)
+        ? SceneGraphParser.getEnabledComponentsInHierarchy(
+            sceneGraph,
+            gameObject,
+          )
         : gameObject.components
       )
         .filter((c) => c.enabled)
@@ -132,7 +163,10 @@ export class ConstraintValidator {
   } {
     const enabledComponents = new Set(
       (sceneGraph
-        ? SceneGraphParser.getEnabledComponentsInHierarchy(sceneGraph, gameObject)
+        ? SceneGraphParser.getEnabledComponentsInHierarchy(
+            sceneGraph,
+            gameObject,
+          )
         : gameObject.components
       )
         .filter((c) => c.enabled)

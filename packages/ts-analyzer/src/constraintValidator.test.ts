@@ -69,6 +69,35 @@ describe("ConstraintValidator", () => {
     expect(result.missingRequired).toEqual(["UnityEngine.Collider"]);
   });
 
+  it("validates anyOf required components (array componentType)", () => {
+    const result = ConstraintValidator.validateGameObject(gameObject, [
+      {
+        componentType: ["UnityEngine.BoxCollider", "UnityEngine.Rigidbody"],
+        requirement: "required",
+      },
+    ]);
+
+    expect(result.isValid).toBe(true);
+    expect(result.missingRequired).toHaveLength(0);
+  });
+
+  it("detects missing anyOf required components (array componentType)", () => {
+    const result = ConstraintValidator.validateGameObject(gameObject, [
+      {
+        componentType: [
+          "UnityEngine.BoxCollider",
+          "UnityEngine.SphereCollider",
+        ],
+        requirement: "required",
+      },
+    ]);
+
+    expect(result.isValid).toBe(false);
+    expect(result.missingRequired).toEqual([
+      "UnityEngine.BoxCollider | UnityEngine.SphereCollider",
+    ]);
+  });
+
   it("validates required components on ancestor objects", () => {
     const childObject = hierarchySceneGraph.gameObjects[1]!;
     const result = ConstraintValidator.validateGameObject(

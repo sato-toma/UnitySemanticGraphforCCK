@@ -158,6 +158,84 @@ Source_Code_Asset = "setRotationScript"
     ]);
   });
 
+  it("requires a Collider for onInteract", () => {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "ts-analyzer-"));
+    const tsFilePath = path.join(tempDir, "onInteractScript.ts");
+    const sceneGraphPath = path.join(tempDir, "SceneGraph.toml");
+
+    fs.writeFileSync(tsFilePath, "$.onInteract(() => {});\n");
+    fs.writeFileSync(
+      sceneGraphPath,
+      `
+project = "TestProject"
+
+[[gameObjects]]
+id = "item-object"
+path = "Item"
+name = "Item"
+parent = ""
+
+[[gameObjects.components]]
+type = "ClusterVR.CreatorKit.Item.Implements.Item"
+enabled = true
+
+[[gameObjects.components]]
+type = "ClusterVR.CreatorKit.Item.Implements.ScriptableItem"
+enabled = true
+[gameObjects.components.properties]
+Source_Code_Asset = "onInteractScript"
+`,
+    );
+
+    const analyzer = new ClusterScriptAnalyzer(sceneGraphPath);
+    const result = analyzer.analyzeTypeScriptFile(tsFilePath);
+
+    expect(result.issues).toHaveLength(1);
+    expect(result.issues[0]?.apiCall).toBe("onInteract");
+    expect(result.issues[0]?.requiredComponents).toEqual([
+      "UnityEngine.BoxCollider | UnityEngine.SphereCollider | UnityEngine.CapsuleCollider | UnityEngine.MeshCollider | UnityEngine.WheelCollider",
+    ]);
+  });
+
+  it("does not flag onInteract when any Collider type is present", () => {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "ts-analyzer-"));
+    const tsFilePath = path.join(tempDir, "onInteractScript.ts");
+    const sceneGraphPath = path.join(tempDir, "SceneGraph.toml");
+
+    fs.writeFileSync(tsFilePath, "$.onInteract(() => {});\n");
+    fs.writeFileSync(
+      sceneGraphPath,
+      `
+project = "TestProject"
+
+[[gameObjects]]
+id = "item-object"
+path = "Item"
+name = "Item"
+parent = ""
+
+[[gameObjects.components]]
+type = "ClusterVR.CreatorKit.Item.Implements.Item"
+enabled = true
+
+[[gameObjects.components]]
+type = "UnityEngine.SphereCollider"
+enabled = true
+
+[[gameObjects.components]]
+type = "ClusterVR.CreatorKit.Item.Implements.ScriptableItem"
+enabled = true
+[gameObjects.components.properties]
+Source_Code_Asset = "onInteractScript"
+`,
+    );
+
+    const analyzer = new ClusterScriptAnalyzer(sceneGraphPath);
+    const result = analyzer.analyzeTypeScriptFile(tsFilePath);
+
+    expect(result.issues).toHaveLength(0);
+  });
+
   it("resolves a nested script from Source_Code_Asset by basename", () => {
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "ts-analyzer-"));
     const sceneGraphPath = path.join(tempDir, "SceneGraph.toml");

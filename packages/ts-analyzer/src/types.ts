@@ -33,7 +33,8 @@ export interface SceneGraph {
 export type ComponentRequirement = "required" | "optional" | "forbidden";
 
 export interface ComponentConstraint {
-  componentType: string;
+  /** A single Unity component full name, or an array meaning "any of these types". */
+  componentType: string | string[];
   requirement: ComponentRequirement;
   properties?: {
     [key: string]: {

@@ -36,6 +36,7 @@ enabled = true
 [gameObjects.components.properties]
 Item_Name = ""
 Size = [0, 0, 0]
+Movement_Type = "Legacy"
 
 [[gameObjects.components]]
 id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-568831067-0"
@@ -80,6 +81,7 @@ enabled = true
 [gameObjects.components.properties]
 Item_Name = ""
 Size = [0, 0, 0]
+Movement_Type = "Legacy"
 
 [[gameObjects.components]]
 id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-965996139-0"
@@ -124,6 +126,7 @@ enabled = true
 [gameObjects.components.properties]
 Item_Name = ""
 Size = [0, 0, 0]
+Movement_Type = "Legacy"
 
 [[gameObjects.components]]
 id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-1369298479-0"
@@ -138,7 +141,7 @@ id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-1369298477-0"
 type = "ClusterVR.CreatorKit.Item.Implements.GrabbableItem"
 enabled = true
 [[gameObjects.components]]
-id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-1369298476-0"
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-1369298482-0"
 type = "ClusterVR.CreatorKit.Item.Implements.ScriptableItem"
 enabled = true
 [gameObjects.components.properties]
@@ -165,6 +168,55 @@ type = "UnityEngine.BoxCollider"
 enabled = true
 
 [[gameObjects]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-148134319-0"
+path = "onInterract"
+name = "onInterract"
+parent = ""
+[[gameObjects.components]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-148134323-0"
+type = "ClusterVR.CreatorKit.Item.Implements.Item"
+enabled = true
+[gameObjects.components.properties]
+Item_Name = ""
+Size = [0, 0, 0]
+Movement_Type = "Legacy"
+
+[[gameObjects.components]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-148134322-0"
+type = "UnityEngine.Rigidbody"
+enabled = true
+[[gameObjects.components]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-148134321-0"
+type = "ClusterVR.CreatorKit.Item.Implements.MovableItem"
+enabled = true
+[[gameObjects.components]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-148134320-0"
+type = "ClusterVR.CreatorKit.Item.Implements.ScriptableItem"
+enabled = true
+[gameObjects.components.properties]
+Source_Code_Asset = "onInteractScript"
+Source_Code = ""
+
+
+[[gameObjects]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-845208725-0"
+path = "onInterract/Cube"
+name = "Cube"
+parent = "onInterract"
+[[gameObjects.components]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-845208729-0"
+type = "UnityEngine.MeshFilter"
+enabled = true
+[[gameObjects.components]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-845208728-0"
+type = "UnityEngine.MeshRenderer"
+enabled = true
+[[gameObjects.components]]
+id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-845208727-0"
+type = "UnityEngine.BoxCollider"
+enabled = true
+
+[[gameObjects]]
 id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-948913346-0"
 path = "setPosition"
 name = "setPosition"
@@ -176,6 +228,7 @@ enabled = true
 [gameObjects.components.properties]
 Item_Name = ""
 Size = [0, 0, 0]
+Movement_Type = "Legacy"
 
 [[gameObjects.components]]
 id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-948913348-0"
@@ -224,6 +277,7 @@ enabled = true
 [gameObjects.components.properties]
 Item_Name = ""
 Size = [0, 0, 0]
+Movement_Type = "Legacy"
 
 [[gameObjects.components]]
 id = "GlobalObjectId_V1-2-4623955290552cb4fb2bccad9a61aa7c-449583703-0"
